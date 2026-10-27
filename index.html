@@ -3,142 +3,154 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#15121c">
+<meta name="theme-color" content="#132539">
 <title>An Iuchair Albannach</title>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
 <style>
-/* Layout: one-column phone-first "reisdagboek": sticky kaart bovenaan met voortgang, daaronder één station per scherm. */
+/* Layout: zelfde "kaartenstapel" als de trouwgids: één kaart per scherm, horizontaal veegbaar, pijlen + stippen onderaan. */
 :root{
-  --bg:#15121c;        /* veen-nacht */
-  --surface:#211c2d;   /* leisteen */
-  --surface-2:#2b2440;
-  --line:#3b3353;
-  --fg:#efe6d4;        /* perkament */
-  --muted:#b3a99a;
-  --heather:#b48ad6;   /* heide */
-  --gold:#d9a441;      /* whisky */
-  --loch:#4f9b97;      /* loch */
-  --ok:#7fc48c;
-  --bad:#e07a6a;
-  --font-display:"Fraunces",Georgia,"Times New Roman",serif;
-  --font-body:"Alegreya Sans","Gill Sans","Segoe UI",system-ui,sans-serif;
+  --bg:#132539; --surface:#1E3854; --fg:#F5F7FA; --muted:#B4C3D4;
+  --accent:#A68D5A; --accent-text:#D2BF92; --accent-ink:#14263A;
+  --tint:#294A6F; --line:#3B5C82; --gold:#A68D5A;
+  --ok:#8FC9A0; --bad:#E39A8C; --heather:#C9A7E6; --loch:#8CC8C4;
+  --font-display:"IM Fell English SC","Iowan Old Style",Georgia,serif;
+  --font-body:"Playfair Display",Georgia,"Times New Roman",serif;
   color-scheme:dark;
 }
-html,body{height:100%}
-body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:17px;line-height:1.5;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 *{box-sizing:border-box}
-h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.15;text-wrap:balance;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px;-webkit-font-smoothing:antialiased}
+.app{height:100%;max-width:480px;margin-inline:auto;display:flex;flex-direction:column;gap:12px}
+.track{flex:1 1 0;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;border-radius:28px;scroll-behavior:smooth}
+.track::-webkit-scrollbar{display:none}
+.card{flex:0 0 100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:28px 22px 72px;display:flex;flex-direction:column;gap:18px}
+.card>*{flex-shrink:0}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text);display:flex;align-items:center;gap:8px}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.6rem,13vw,3.6rem);line-height:.98;letter-spacing:-.01em}
+h1 em{font-style:normal;color:var(--accent)}
+h1 .sub{display:block;font-size:.5em;line-height:1.1;margin-top:.25em;color:var(--accent-text)}
+h2{font-size:clamp(2rem,9vw,2.6rem);line-height:1.02;color:var(--accent)}
+h3{font-size:1.5rem;line-height:1.1;color:var(--accent)}
 p{margin:0}
-.wrap{max-width:560px;margin:0 auto;display:grid;gap:20px}
-.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.lead{font-size:17px;color:var(--muted)}
 .muted{color:var(--muted)}
-button{font:inherit;cursor:pointer;border:0;border-radius:10px}
-.btn{background:var(--heather);color:#1a1226;font-weight:700;padding:14px 20px;width:100%;font-size:17px;transition:transform .08s}
-.btn:active{transform:scale(.98)}
-.btn.ghost{background:transparent;color:var(--heather);border:1.5px solid var(--heather)}
-.btn.small{width:auto;padding:8px 14px;font-size:14px}
-.btn:disabled{opacity:.45;cursor:default}
-:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-
-/* kop */
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
-.top .name{font-family:var(--font-display);font-size:18px}
-.top .meta{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-.route{display:flex;gap:6px;padding-block:10px}
-.route span{flex:1;height:5px;border-radius:3px;background:var(--line)}
-.route span.done{background:var(--gold)}
-.route span.now{background:var(--heather)}
-.nav{display:flex;gap:8px;justify-content:space-between}
-.nav .btn{flex:1;padding:8px 6px;white-space:nowrap}
-
-/* hero */
-.hero{display:grid;gap:14px;padding-block:22px 6px;text-align:left}
-.hero h1{font-size:44px;font-weight:700;font-variation-settings:"opsz" 144}
-.hero h1 em{font-style:italic;color:var(--heather)}
-.tartan{height:14px;border-radius:7px;background:
-  repeating-linear-gradient(90deg,#2d5b3e 0 18px,#1b2e4a 18px 30px,#9b2c2c 30px 36px,#1b2e4a 36px 48px,#d9a441 48px 52px,#1b2e4a 52px 64px)}
-
-/* kaarten */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;gap:12px;min-width:0}
-.card.fact{border-color:transparent;background:linear-gradient(135deg,var(--surface-2),var(--surface));position:relative}
-.card.fact::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:2px;background:var(--gold)}
-.card.mine{border-color:var(--heather)}
-.card.theirs{border-style:dashed}
-.role-tag{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
-.role-tag::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor}
-.avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid currentColor;flex:none}
+.icon{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.rings{width:72px;height:44px;color:var(--gold)}
+.cover{justify-content:space-between}
+.cover-top{display:flex;flex-direction:column;gap:18px}
+.facts{display:grid;gap:10px}
+.fact{display:flex;align-items:center;gap:14px;background:var(--tint);border-radius:18px;padding:14px 16px}
+.fact small{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.fact strong{font-size:17px;font-weight:600}
+.swipe{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}
+.swipe .icon{width:18px;height:18px;animation:nudge 2.2s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+.avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);flex:none}
 .avatar.lg{width:84px;height:84px}
+.duo{display:flex;justify-content:center}
+.duo img{margin:0 -6px}
+.roles{display:grid;gap:12px}
+.rbtn{display:grid;grid-template-columns:56px 1fr 24px;gap:14px;align-items:center;text-align:left;min-height:88px;padding:16px;border-radius:22px;cursor:pointer;font:inherit;font-size:17px;font-weight:600;line-height:1.35;border:2px solid var(--accent);background:transparent;color:var(--fg)}
+.rbtn.primary{background:var(--accent);color:var(--accent-ink);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.rbtn .x-sub{display:block;font-size:14px;font-weight:500;opacity:.9}
+.rbtn .badge{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--tint);color:var(--accent-text)}
+.rbtn.primary .badge{background:var(--accent-ink);color:var(--accent)}
+.note{display:grid;grid-template-columns:24px 1fr;gap:12px;background:var(--tint);border-radius:18px;padding:16px;font-size:15.5px}
+.note .icon{color:var(--accent-text)}
+.note strong{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-text);margin-bottom:4px}
+.clue{display:grid;gap:12px;border-radius:18px;padding:16px;border:2px solid var(--line);background:transparent;min-width:0}
+.clue.mine{border-color:var(--accent);background:var(--tint)}
+.clue.theirs{border-style:dashed}
 .who{display:flex;align-items:center;gap:12px}
-.roles .btn{display:flex;align-items:center;gap:14px;text-align:left}
-.roles .btn span{display:grid;gap:2px}
-.duo{display:flex;justify-content:center;gap:-10px}
-.duo img{margin:0 -8px;border-color:var(--gold)}
-.role-a{color:var(--heather)}
-.role-b{color:var(--loch)}
-.clue{display:grid;gap:10px}
-.roles{display:grid;gap:10px}
-.roles .btn small{font-weight:400;opacity:.85}
-.roles .btn.b{background:var(--loch)}
-.roles .btn.both{background:var(--gold)}
-
+.who .avatar{width:44px;height:44px}
+.who .tag{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-text)}
+.answer{display:grid;gap:10px}
+.answer input{width:100%;font:inherit;font-family:var(--font-display);font-size:24px;letter-spacing:.14em;text-transform:uppercase;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:var(--bg);color:var(--fg);text-align:center}
+.answer input.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:14px 18px;border-radius:16px;border:2px solid var(--accent);font:inherit;font-weight:600;font-size:17px;cursor:pointer;transition:transform .12s;width:100%}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-secondary{background:transparent;color:var(--accent-text)}
+.btn:disabled{opacity:.4;cursor:default}
+.tl-link{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--accent-text);background:none;border:0;padding:8px 0;cursor:pointer;font-family:inherit;min-height:40px;justify-self:center}
+.feedback{min-height:22px;font-size:15px}
+.feedback.bad{color:var(--bad)}
+.hintbox{font-size:15px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.tokens{display:flex;flex-wrap:wrap;gap:8px}
+.token{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:99px;background:var(--surface);color:var(--accent-text);border:1px solid var(--line)}
+.token.got{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.solved{display:grid;gap:10px;text-align:center;background:var(--tint);border-radius:18px;padding:18px}
+.solved .big{font-family:var(--font-display);font-size:2.4rem;line-height:1;color:var(--accent)}
+.letter{white-space:pre-line;font-size:16px;line-height:1.6}
 /* puzzelvisuals */
-.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
-.week div{background:var(--surface-2);border-radius:10px;padding:8px 0;display:grid;gap:2px}
-.week b{font-family:var(--font-display);font-size:20px;color:var(--gold);font-variant-numeric:tabular-nums}
-.week small{font-size:12px;color:var(--muted)}
-.sonar{display:grid;grid-template-columns:28px repeat(5,1fr);gap:4px;text-align:center;font-variant-numeric:tabular-nums}
-.sonar div{padding:8px 0;border-radius:8px;background:var(--surface-2);font-family:var(--font-display);font-size:19px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}
+.week div{background:var(--surface);border-radius:10px;padding:8px 0;display:grid;gap:2px}
+.week b{font-family:var(--font-display);font-size:20px;color:var(--accent-text);font-variant-numeric:tabular-nums}
+.week small{font-size:11px;color:var(--muted)}
+.sonar{display:grid;grid-template-columns:26px repeat(5,1fr);gap:4px;text-align:center;font-variant-numeric:tabular-nums}
+.sonar div{padding:7px 0;border-radius:8px;background:var(--surface);font-family:var(--font-display);font-size:18px}
 .sonar .h{background:transparent;color:var(--loch);font-family:var(--font-body);font-size:13px;font-weight:700}
-.bands{display:flex;height:64px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.bands{display:flex;height:64px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
 .bands span{flex:1}
 .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.legend div{display:flex;align-items:center;gap:10px;background:var(--surface-2);border-radius:10px;padding:8px 10px}
+.legend div{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:10px;padding:8px 10px;font-size:15px}
 .legend i{width:22px;height:22px;border-radius:5px;display:inline-block;border:1px solid rgba(255,255,255,.15)}
-.legend b{font-family:var(--font-display);font-size:20px;color:var(--gold)}
+.legend b{font-family:var(--font-display);font-size:20px;color:var(--accent-text);margin-left:auto}
 .slots{display:flex;gap:6px;flex-wrap:wrap}
-.slots div{width:40px;height:48px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;font-family:var(--font-display);font-size:24px;position:relative}
+.slots div{width:40px;height:48px;border-radius:8px;background:var(--surface);display:grid;place-items:center;font-family:var(--font-display);font-size:24px;position:relative}
 .slots div.empty{border:1.5px dashed var(--line);background:transparent;color:var(--line)}
 .slots small{position:absolute;top:2px;right:5px;font-size:10px;color:var(--muted);font-family:var(--font-body)}
 .cask{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cask div{background:var(--surface-2);border-radius:10px;padding:10px;text-align:center}
-.cask b{display:block;font-family:var(--font-display);font-size:26px;color:var(--gold)}
+.cask b{font-size:22px}
+.cask div{background:var(--surface);border-radius:10px;padding:10px;text-align:center}
+.cask b{display:block;font-family:var(--font-display);font-size:26px;color:var(--accent-text)}
 .cask small{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
-.quaich{display:grid;place-items:center;padding:6px 0}
-
-/* antwoord */
-.answer{display:grid;gap:10px}
-.answer input{width:100%;font:inherit;font-size:22px;letter-spacing:.12em;text-transform:uppercase;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--fg);text-align:center;font-family:var(--font-display)}
-.answer input.shake{animation:shake .35s}
-@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.feedback{min-height:22px;font-size:15px}
-.feedback.bad{color:var(--bad)}
-.feedback.ok{color:var(--ok)}
-.hintbox{font-size:15px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
-.tokens{display:flex;flex-wrap:wrap;gap:8px}
-.token{background:var(--surface-2);border:1px solid var(--gold);color:var(--gold);border-radius:999px;padding:4px 12px;font-family:var(--font-display);font-size:15px}
-.token.locked{border-color:var(--line);color:var(--line)}
-.solved{text-align:center;display:grid;gap:12px;padding-block:8px}
-.solved .big{font-family:var(--font-display);font-size:30px;color:var(--gold)}
-.final h1{font-size:34px}
-.letter{font-size:18px;line-height:1.6;font-family:var(--font-display);font-weight:400;white-space:pre-line}
-.actions{display:grid;gap:10px}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.quaich{display:grid;place-items:center;padding:4px 0}
+/* nav */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.nav-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer}
+.nav-btn:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:2px;align-items:center}
+.dot{width:22px;height:40px;border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center}
+.dot::after{content:"";width:8px;height:8px;border-radius:99px;background:var(--line);transition:width .2s,background-color .2s}
+.dot.done::after{background:var(--accent-text)}
+.dot[aria-current="true"]::after{width:22px;background:var(--accent)}
+.dot.lock{opacity:.4}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.track{scroll-behavior:auto}}
 </style>
 
-<div class="wrap">
-  <div class="top" id="top" hidden>
-    <span class="name">An Iuchair Albannach</span>
-    <span class="meta" id="meta"></span>
-  </div>
-  <div id="app"></div>
-</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <defs>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9.5 5.5L16 12l-6.5 6.5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.2a7 7 0 0114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.6"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="12" r="4.5"/><path d="M12.5 12H21M18 12v3.5M15 12v2.5"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 016.5 3H20v15H6.5A2.5 2.5 0 004 20.5zM4 20.5V5.5M20 18v3H6.5"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-both" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><circle cx="16.5" cy="9.5" r="2.8"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M15 14.5c2.6 0 5 2 5 5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5.5 9.5V20h13V9.5"/></symbol>
+ </defs>
+</svg>
+
+<main class="app">
+  <div class="track" id="track" tabindex="0" aria-label="Escape game, veeg naar links of rechts"></div>
+  <nav class="nav">
+    <button class="nav-btn" id="prev" aria-label="Vorige"><svg class="icon"><use href="#i-left"/></svg></button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn" id="next" aria-label="Volgende"><svg class="icon"><use href="#i-right"/></svg></button>
+  </nav>
+</main>
 
 <script>
-// ───────── PAS HIER AAN ─────────
 const CONFIG = {
   bruid: "Yenthe",          // naam van de bruid
   bruidegom: "Renaat",  // naam van de verloofde
@@ -157,23 +169,24 @@ Slàinte mhath!`
 const STATIONS = [
   {
     place:"Dùn Èideann", placeNl:"Edinburgh", title:"Het kanon van één uur", token:"Fàilte", tokenNl:"welkom",
-    intro:"Jullie reis begint onder de rots van Edinburgh Castle. Iedere middag schrikt een toerist op van een kanonschot. Dat is niet zomaar lawaai: het is een klok.",
+    intro:"Jullie reis begint onder de rots van Edinburgh Castle. Iedere middag schrikt een toerist op van een kanonschot. Dat is niet zomaar lawaai: het is een klok. De kanonniers bewaren hun kruit achter een cijferslot.",
     fact:"Sinds 1861 vuurt de One O'Clock Gun elke dag om 13:00, zodat schepen in de haven van Leith hun chronometer gelijk konden zetten. Eén dag in de week blijft het stil.",
     a:`<p>Jij hebt het dienstrooster van de kanonniers. Elke dag draagt een nummer.</p>
        <div class="week">
         <div><small>ma</small><b>18</b></div><div><small>di</small><b>25</b></div><div><small>wo</small><b>31</b></div>
         <div><small>do</small><b>09</b></div><div><small>vr</small><b>56</b></div><div><small>za</small><b>77</b></div><div><small>zo</small><b>42</b></div>
-       </div>`,
+       </div>
+       <p class="muted" style="font-size:14px">Op de achterkant staat gekrabbeld: <em>"Het slot wil eerst het verschil, dan het uur."</em></p>`,
     b:`<p>Jij hebt het reglement van het kasteel:</p>
        <p><em>"Het kanon vuurt zes dagen per week om 13:00 uur. Op de dag des Heren en op Kerstdag zwijgt het."</em></p>
-       <p>De code is: het nummer van de stille weekdag, gevolgd door het uur van het schot in 24-uursnotatie (twee cijfers).</p>`,
-    hint:"Op zondag rusten de kanonniers. Nummer van zondag + '13'.",
-    answer:"4213",
+       <p><em>"Het kruitslot: neem de nummers van de dag vóór en de dag ná de stille dag. Trek het kleinste van het grootste af. Daarachter komt het uur van het schot, in 24-uursnotatie."</em></p>`,
+    hint:"Stil op zondag. Zaterdag en maandag zijn de buren: 77 − 18, en dan '13' erachter.",
+    answer:"5913",
     reveal:"Vóór het kanon viel er al een tijdbal: op de Nelson-zuil op Calton Hill zakt nog elke dag om 13:00 een grote bal naar beneden. Kijk omhoog als je er bent."
   },
   {
     place:"Loch Nis", placeNl:"Loch Ness", title:"Sonar in het donkere water", token:"Uisge", tokenNl:"water",
-    intro:"Noordwaarts, naar het loch dat meer zoet water bevat dan alle meren van Engeland en Wales samen. Jullie sonar vangt iets op.",
+    intro:"Noordwaarts, naar het loch dat meer zoet water bevat dan alle meren van Engeland en Wales samen. Jullie sonar vangt iets op, maar niet elk signaal is wat het lijkt.",
     fact:"De beroemdste foto van Nessie uit 1934 bleek in 1994 een grap: een speelgoedonderzeeër met een boetseerklei-nek. Het verhaal van het monster is wel veel ouder: al in 565 zou de heilige Columba een waterbeest hebben verjaagd.",
     a:`<p>Jij ziet het sonarscherm. Iedere cel toont één letter.</p>
        <div class="sonar">
@@ -183,23 +196,26 @@ const STATIONS = [
         <div class="h">C</div><div>P</div><div>I</div><div>W</div><div>H</div><div>G</div>
         <div class="h">D</div><div>A</div><div>Y</div><div>E</div><div>D</div><div>B</div>
         <div class="h">E</div><div>F</div><div>C</div><div>O</div><div>X</div><div>Q</div>
-       </div>`,
-    b:`<p>Jij hebt het logboek van de boot met de sonarsignalen, in volgorde:</p>
-       <p style="font-family:var(--font-display);font-size:24px;color:var(--loch);letter-spacing:.1em">A2 · B4 · B2 · C1 · C2 · D3</p>
-       <p>Lees de letters af en jullie kennen de naam van het wezen dat volgens de Schotse legende in elk loch woont: een paard dat je het water in lokt.</p>`,
-    hint:"Rij (letter) eerst, dan kolom (cijfer). Zes letters, eindigt op -IE.",
+       </div>
+       <p class="muted" style="font-size:14px">Op het scherm knippert een waarschuwing: <em>"Om 03:00 passeerde een vissersboot. Dat signaal is geen beest."</em></p>`,
+    b:`<p>Jij hebt het logboek van de boot, met de sonarsignalen op tijd:</p>
+       <p style="font-family:var(--font-display);font-size:20px;color:var(--loch);letter-spacing:.06em;line-height:1.5">00:40 D3 · 01:15 C2 · 02:05 C1<br>03:00 E5 · 03:50 B2 · 04:30 B4 · 05:10 A2</p>
+       <p><em>"De sonar leest van achter naar voor: het laatste signaal is de eerste letter."</em></p>
+       <p>Wie het goed leest, kent de naam van het wezen dat volgens de legende in elk loch woont: een paard dat je het water in lokt.</p>`,
+    hint:"Schrap 03:00. Lees dan van 05:10 terug naar 00:40: rij (letter) eerst, dan kolom (cijfer). Eindigt op -IE.",
     answer:"KELPIE",
     reveal:"Bij Falkirk staan twee kelpies van 30 meter hoog in staal. Ze zijn de grootste paardenbeelden ter wereld en staan op de weg tussen Edinburgh en Glasgow."
   },
   {
     place:"An t-Eilean Sgitheanach", placeNl:"Isle of Skye", title:"De verboden ruit", token:"Clann", tokenNl:"familie",
-    intro:"Over de brug naar Skye, thuisbasis van clan MacLeod. In de burcht Dunvegan hangt een oude lap stof die de clan al eeuwen beschermt. Jullie vinden een andere lap: een tartan met een boodschap.",
-    fact:"Na de slag bij Culloden in 1746 verbood de Dress Act het dragen van tartan en kilt in de Highlands. Wie het toch deed, riskeerde zes maanden cel of deportatie. Het verbod hield 36 jaar stand.",
-    a:`<p>Jij hebt de stof. Lees de banden van links naar rechts.</p>
+    intro:"Over de brug naar Skye, thuisbasis van clan MacLeod. In de burcht Dunvegan hangt een oude lap stof die de clan al eeuwen beschermt. Jullie vinden een andere lap: een tartan met een boodschap, geweven volgens de regels van het getouw.",
+    fact:"Na de slag bij Culloden in 1746 verbood de Dress Act het dragen van tartan en kilt in de Highlands. Wie het toch deed, riskeerde zes maanden cel of deportatie. Het verbod hield 36 jaar stand, tot 1782.",
+    a:`<p>Jij hebt de stof. Zes banden, van links naar rechts:</p>
        <div class="bands">
-        <span style="background:#1f3a66"></span><span style="background:#9b2c2c"></span><span style="background:#2d5b3e"></span><span style="background:#d9a441"></span>
+        <span style="background:#d9a441"></span><span style="background:#2d5b3e"></span><span style="background:#9b2c2c"></span><span style="background:#1f3a66"></span><span style="background:#111"></span><span style="background:#2d5b3e"></span>
        </div>
-       <p class="muted" style="font-size:14px">Vier kleuren, vier banden.</p>`,
+       <p class="muted" style="font-size:14px">Geel · groen · rood · blauw · zwart · groen.</p>
+       <p class="muted" style="font-size:14px">In de zoom staat geborduurd: <em>"Een getouw leest van rechts naar links."</em></p>`,
     b:`<p>Jij hebt het weefboek van de clan. Elke kleur draagt een cijfer:</p>
        <div class="legend">
         <div><i style="background:#9b2c2c"></i><span>Rood</span><b>3</b></div>
@@ -209,50 +225,54 @@ const STATIONS = [
         <div><i style="background:#111"></i><span>Zwart</span><b>0</b></div>
         <div><i style="background:#efe6d4"></i><span>Wit</span><b>5</b></div>
        </div>
-       <p>Vier banden geven een code van vier cijfers.</p>`,
-    hint:"Blauw, rood, groen, geel. Zoek de cijfers erbij.",
-    answer:"7319",
+       <p><em>"Twee regels van de wever: zwart is de grond, geen band. Een kleur die terugkeert, telt alleen de eerste keer."</em></p>
+       <p>De code heeft vier cijfers.</p>`,
+    hint:"Van rechts naar links: groen, (zwart overslaan), blauw, rood, (groen al gehad), geel.",
+    answer:"1739",
     reveal:"Het Scottish Register of Tartans telt meer dan 7.000 geregistreerde patronen, en iedereen mag een eigen ontwerp laten vastleggen. Een eigen huwelijkstartan is dus een echt ding."
   },
   {
     place:"Inbhir Nis", placeNl:"Inverness", title:"De heildronk", token:"Slàinte", tokenNl:"gezondheid",
-    intro:"In een pub aan de rivier de Ness staat een bord met een afgebrokkeld woord. Het is wat Schotten zeggen voor ze hun glas heffen. Jullie hebben elk de helft van de letters.",
+    intro:"In een pub aan de rivier de Ness hangt een bord met wat Schotten zeggen voor ze hun glas heffen. Maar de verf bladdert, en jullie zien het bord elk op een andere manier. De regel voor jouw helft staat op de kaart van de ander.",
     fact:"Op Burns Night, 25 januari, wordt de haggis plechtig binnengedragen op doedelzakmuziek en toegesproken met een gedicht van Robert Burns, voor hij met een dolk wordt opengesneden. In de VS is haggis sinds 1971 verboden, omdat er schapenlong in zit.",
-    a:`<p>Jij hebt de letters op de <strong>oneven</strong> plaatsen (1, 3, 5, 7):</p>
+    a:`<p>Jij staat vóór het bord en ziet de letters op de <strong>oneven</strong> plaatsen (1, 3, 5, 7):</p>
        <div class="slots">
-        <div>S<small>1</small></div><div class="empty">·<small>2</small></div><div>A<small>3</small></div><div class="empty">·<small>4</small></div>
-        <div>N<small>5</small></div><div class="empty">·<small>6</small></div><div>E<small>7</small></div>
-       </div>`,
-    b:`<p>Jij hebt de letters op de <strong>even</strong> plaatsen (2, 4, 6):</p>
-       <div class="slots">
-        <div class="empty">·<small>1</small></div><div>L<small>2</small></div><div class="empty">·<small>3</small></div><div>I<small>4</small></div>
-        <div class="empty">·<small>5</small></div><div>T<small>6</small></div><div class="empty">·<small>7</small></div>
+        <div>T<small>1</small></div><div class="empty">·<small>2</small></div><div>B<small>3</small></div><div class="empty">·<small>4</small></div>
+        <div>O<small>5</small></div><div class="empty">·<small>6</small></div><div>F<small>7</small></div>
        </div>
+       <p><em>Regel voor de ander:</em> "Wie het bord in de spiegel achter de bar ziet, leest de even plaatsen in omgekeerde volgorde."</p>`,
+    b:`<p>Jij ziet het bord in de spiegel achter de bar. Op de <strong>even</strong> plaatsen staat, van links naar rechts:</p>
+       <div class="slots">
+        <div class="empty">·<small>1</small></div><div>T<small>2</small></div><div class="empty">·<small>3</small></div><div>I<small>4</small></div>
+        <div class="empty">·<small>5</small></div><div>L<small>6</small></div><div class="empty">·<small>7</small></div>
+       </div>
+       <p><em>Regel voor de ander:</em> "De schilder was dronken en schilderde telkens de letter ná de juiste in het alfabet."</p>
        <p>Het woord betekent 'gezondheid' en vul je in zonder accent.</p>`,
-    hint:"Spel het samen, plaats per plaats. Het begint met S en eindigt op E.",
+    hint:"Oneven: één letter terug (T→S, B→A, O→N, F→E). Even: omdraaien (T I L wordt L I T). Rits ze samen.",
     answer:"SLAINTE",
     reveal:"Het volledige antwoord op 'Slàinte!' is 'Slàinte mhath!' (spreek uit: slaantsje va). En whisky heet in het Gaelic 'uisge beatha': water van het leven. Daar komt het woord whisky vandaan."
   },
   {
     place:"Srath Spè", placeNl:"Speyside", title:"Het aandeel van de engelen", token:"Beatha", tokenNl:"leven",
-    intro:"Langs de rivier de Spey liggen meer distilleerderijen dan waar ook ter wereld. In een pakhuis staat één vat met een handgeschreven etiket, maar de helft van de informatie staat in het boek van de stoker.",
+    intro:"Langs de rivier de Spey liggen meer distilleerderijen dan waar ook ter wereld. In een pakhuis staat één vat met een handgeschreven etiket. Het pakhuis gaat op een cijferslot, en de stoker rekent op zijn eigen manier.",
     fact:"Scotch mag pas Scotch heten na minstens drie jaar rijping in eiken vaten, op Schotse bodem. Al die tijd verdampt een deel door het hout. Dat verlies heet the angels' share.",
     a:`<p>Jij leest het etiket op het vat:</p>
        <div class="cask">
         <div><small>Gevuld</small><b>2014</b></div>
         <div><small>Gebotteld</small><b>2026</b></div>
-       </div>
-       <p>Reken uit hoeveel jaar het vat heeft gerijpt.</p>`,
+        <div><small>Vatnummer</small><b>128</b></div>
+        <div><small>Hout</small><b>Sherry</b></div>
+       </div>`,
     b:`<p>Jij hebt het boek van de stoker:</p>
-       <p><em>"Ieder jaar nemen de engelen twee procent van wat in het vat zit. Vermenigvuldig de jaren met twee en je weet hoeveel procent naar de hemel is gegaan."</em></p>
-       <p>De code is dat percentage, als getal.</p>`,
-    hint:"12 jaar × 2 procent.",
-    answer:"24",
+       <p><em>"Ieder jaar nemen de engelen twee procent. Reken uit hoeveel procent in al die rijpingsjaren naar de hemel ging."</em></p>
+       <p><em>"Het slot van het pakhuis wil niet wat de engelen namen, maar wat er voor ons overbleef (van de honderd). Daarachter het laatste cijfer van het vatnummer."</em></p>`,
+    hint:"12 jaar × 2 = 24 procent weg. Dus 76 over. Vatnummer eindigt op 8.",
+    answer:"768",
     reveal:"Schotland telt meer dan 140 werkende distilleerderijen. Het grootste deel van de whisky die er rijpt, is ouder dan de mensen die hem bottelen. Op Speyside kun je bij de meeste gewoon binnenlopen voor een proeverij."
   },
   {
     place:"Gretna Green", placeNl:"het dorp van de smid", title:"De smid en de beker", token:"Gràdh", tokenNl:"liefde",
-    intro:"Jullie laatste halte ligt net over de Engelse grens: het dorp waar al 270 jaar stiekem getrouwd wordt. De smid wacht bij het aambeeld, maar de kluis gaat pas open als jullie samen de naam van het laatste voorwerp kennen.",
+    intro:"Jullie laatste halte ligt net over de Engelse grens: het dorp waar al 270 jaar stiekem getrouwd wordt. De smid wacht bij het aambeeld, maar hij spreekt alleen wie de naam van het voorwerp op zijn tafel kent.",
     fact:"Sinds 1754 vluchtten jonge Engelse stellen naar Gretna Green, omdat je in Schotland zonder toestemming van je ouders mocht trouwen. De smid voltrok het huwelijk met een hamerslag op het aambeeld. Die 'anvil priests' trouwden tot 5.000 stellen per jaar.",
     a:`<p>Jij ziet het voorwerp op tafel:</p>
        <div class="quaich">
@@ -264,136 +284,165 @@ const STATIONS = [
          <ellipse cx="110" cy="40" rx="70" ry="9" fill="#b8832a"/>
         </svg>
        </div>
-       <p>Een lage beker met twee oren. Het bruidspaar drinkt er tijdens de ceremonie samen uit: een hand per oor. Een vriendschapsbeker.</p>`,
-    b:`<p>Jij hebt de aantekening van de smid:</p>
-       <p><em>"Zes letters. De Schotten noemen hem naar het Gaelic woord 'cuach', maar ze schrijven de eerste klank met een letter die in het Gaelic alfabet niet bestaat. Dat alfabet telt maar 18 letters: geen J, K, Q, V, W, X, Y of Z."</em></p>
-       <p>Verwerk 'cuach' tot het Schotse woord met die vreemde beginletter.</p>`,
-    hint:"Begint met QU en eindigt op -CH.",
+       <p>Een lage beker met twee oren. Het bruidspaar drinkt er tijdens de ceremonie samen uit: een hand per oor.</p>
+       <p class="muted" style="font-size:14px">Op een kaartje bij de beker: <em>"Het Gaelic alfabet telt maar 18 letters. Geen J, K, Q, V, W, X, Y of Z."</em></p>`,
+    b:`<p>Jij hebt de rekening van de smid, met het woord erop in zijn eigen spelling:</p>
+       <p style="font-family:var(--font-display);font-size:26px;color:var(--accent-text)">C U A C H</p>
+       <p><em>"Zo schrijven de Gaels het. De Schotten schrijven dezelfde beginklank met een letter die de Gaels niet kennen, gevolgd door een U. Zes letters in totaal."</em></p>`,
+    hint:"De eerste C wordt een letter die niet in het Gaelic alfabet bestaat en als 'kw' klinkt. Daarna gewoon U-A-I-C-H... bijna: de A wordt AI.",
     answer:"QUAICH",
-    reveal:"De traditie waarin dit cadeau past: de luckenbooth. Twee verstrengelde hartjes met een kroon erboven, al sinds de 17e eeuw in Edinburgh aan een geliefde gegeven als teken van trouw en geluk. Jullie vinden ze in elke juwelier in Schotland."
+    reveal:"De smid knikt. Maar de kluis achter hem heeft nog een cijferslot. Veeg door."
   }
 ];
 
-const KEY="schotse-sleutel-v1";
-let state = load() || { role:null, step:0, solved:[], start:null, hints:{} };
+
+const KEY="iuchair-v3";
+let state = load() || { role:null, solved:[], start:null, hints:{}, page:0 };
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
 function norm(s){ return (s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toUpperCase().replace(/[^A-Z0-9]/g,""); }
-
-const app=document.getElementById("app"), bar=document.getElementById("top"), meta=document.getElementById("meta");
-
-function roleLabel(){ return state.role==="a"?CONFIG.bruid : state.role==="b"?CONFIG.bruidegom : "Samen"; }
 function elapsed(){ if(!state.start) return "0:00"; const s=Math.floor((Date.now()-state.start)/1000); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); }
-setInterval(()=>{ if(state.start && state.step<STATIONS.length) meta.textContent = roleLabel()+" · "+elapsed(); },1000);
+
+const track=document.getElementById("track"), dots=document.getElementById("dots"), prevB=document.getElementById("prev"), nextB=document.getElementById("next");
+const N = STATIONS.length + 2;           // cover + 6 haltes + finale
+const allSolved = () => state.solved.length===STATIONS.length;
+function unlocked(p){ // welke kaart mag je zien
+  if(p===0) return true;
+  if(!state.role) return false;
+  if(p===N-1) return allSolved();
+  return p-1 <= state.solved.length;   // halte k pas na k opgeloste
+}
+
+function coverCard(){
+  const roleName = state.role==="a"?CONFIG.bruid : state.role==="b"?CONFIG.bruidegom : state.role==="both"?"samen":null;
+  return `<section class="card cover" aria-label="Welkom">
+    <div class="cover-top">
+      <svg class="rings" viewBox="0 0 72 44" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="26" cy="22" r="16"/><circle cx="46" cy="22" r="16"/></svg>
+      <div class="eyebrow">Online escape game · huwelijksreis</div>
+      <h1>An Iuchair <em>Albannach</em><span class="sub">De Schotse Sleutel</span></h1>
+      <p class="lead">Zes haltes van Dùn Èideann tot Gretna Green. Bij elke halte krijgt ieder van jullie de helft van de aanwijzing. Alleen samen vinden jullie de code die de kluis van de smid opent.</p>
+    </div>
+    <div class="facts">
+      <div class="fact"><svg class="icon" style="color:var(--accent-text)"><use href="#i-pin"/></svg><div><small>Voor</small><strong>${CONFIG.bruid} &amp; ${CONFIG.bruidegom}</strong></div></div>
+      <div class="fact"><svg class="icon" style="color:var(--accent-text)"><use href="#i-key"/></svg><div><small>Van</small><strong>${CONFIG.afzender}</strong></div></div>
+    </div>
+    <div class="roles">
+      <p class="muted" style="font-size:14px">${roleName?`Je speelt als <strong style="color:var(--accent-text)">${roleName}</strong>. Kies opnieuw als dat niet klopt.`:"Speel elk op je eigen gsm en kies je rol, of speel samen op één toestel."}</p>
+      <button class="rbtn primary" data-role="a"><img class="avatar" src="yenthe.jpg" alt=""><span>${CONFIG.bruid}<span class="x-sub">Ik zie de voorwerpen, kaarten en etiketten</span></span><svg class="icon"><use href="#i-arrow"/></svg></button>
+      <button class="rbtn" data-role="b"><img class="avatar" src="renaat.jpg" alt=""><span>${CONFIG.bruidegom}<span class="x-sub">Ik zie de reglementen, logboeken en legendes</span></span><svg class="icon"><use href="#i-arrow"/></svg></button>
+      <button class="rbtn" data-role="both"><span class="badge"><svg class="icon"><use href="#i-both"/></svg></span><span>Samen op één gsm<span class="x-sub">Alle aanwijzingen op één scherm</span></span><svg class="icon"><use href="#i-arrow"/></svg></button>
+    </div>
+    <div class="swipe"><span>Kies een rol en veeg door</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+    <p class="muted" style="font-size:13px"><em>Fàilte gu Alba</em> is Gaelic voor 'welkom in Schotland'.</p>
+  </section>`;
+}
+
+function clueBlock(st, who){
+  const mine = state.role===who || state.role==="both";
+  const name = who==="a"?CONFIG.bruid:CONFIG.bruidegom, img = who==="a"?"yenthe.jpg":"renaat.jpg";
+  const head=`<div class="who"><img class="avatar" src="${img}" alt=""><span class="tag">Aanwijzing van ${name}</span></div>`;
+  if(mine) return `<div class="clue mine">${head}${who==="a"?st.a:st.b}</div>`;
+  return `<div class="clue theirs">${head}<p class="muted" style="font-size:15px">Dit deel staat alleen op de gsm van ${name}. Vraag ernaar, of leg jullie schermen naast elkaar.</p></div>`;
+}
+
+function stationCard(i){
+  const st=STATIONS[i], solved=state.solved.includes(i), hinted=!!state.hints[i], open=unlocked(i+1);
+  if(!open) return `<section class="card" aria-label="Vergrendeld"><div class="eyebrow">Halte ${i+1} van ${STATIONS.length}</div><h2>${st.place}</h2><p class="muted">${st.placeNl}</p><div class="note"><svg class="icon"><use href="#i-key"/></svg><p><strong>Nog gesloten</strong>Los eerst de vorige halte op.</p></div></section>`;
+  return `<section class="card" aria-label="${st.placeNl}">
+    <div class="eyebrow"><svg class="icon" style="width:18px;height:18px"><use href="#i-pin"/></svg>Halte ${i+1} van ${STATIONS.length} · ${st.placeNl}</div>
+    <h2>${st.place}</h2>
+    <h3 style="color:var(--accent-text)">${st.title}</h3>
+    <p>${st.intro}</p>
+    <div class="note"><svg class="icon"><use href="#i-star"/></svg><p><strong>Wist je dat</strong>${st.fact}</p></div>
+    ${clueBlock(st,"a")}${clueBlock(st,"b")}
+    ${solved ? `<div class="solved"><div class="eyebrow" style="justify-content:center;color:var(--ok)">Opgelost</div><div class="big">${st.token}</div><p class="muted">Gaelic voor <em>${st.tokenNl}</em>. Jullie ${i+1}e woord.</p><p style="font-size:15px">${st.reveal}</p><button class="btn btn-primary" data-go="${i+2}">${i+1<STATIONS.length?"Naar "+STATIONS[i+1].placeNl:"Open de kluis"} <svg class="icon"><use href="#i-arrow"/></svg></button></div>`
+    : `<div class="answer">
+        <label for="ans-${i}" class="eyebrow">Jullie antwoord</label>
+        <input id="ans-${i}" autocomplete="off" autocapitalize="characters" inputmode="${/^\d+$/.test(st.answer)?'numeric':'text'}" placeholder="${/^\d+$/.test(st.answer)?'cijfers':'woord'}">
+        <div class="feedback" id="fb-${i}"></div>
+        <button class="btn btn-primary" data-check="${i}">Controleer</button>
+        ${hinted?`<div class="hintbox">Hint: ${st.hint}</div>`:`<button class="tl-link" data-hint="${i}">Geef een hint <svg class="icon" style="width:16px;height:16px"><use href="#i-arrow"/></svg></button>`}
+      </div>`}
+    <div class="tokens">${STATIONS.map((s,k)=>`<span class="token ${state.solved.includes(k)?'got':''}">${state.solved.includes(k)?s.token:'· · ·'}</span>`).join("")}</div>
+  </section>`;
+}
+
+function finalCard(){
+  if(!allSolved()) return `<section class="card" aria-label="Vergrendeld"><div class="eyebrow">De kluis van de smid</div><h2>Gretna Green</h2><div class="note"><svg class="icon"><use href="#i-key"/></svg><p><strong>Nog gesloten</strong>Zes woorden openen de weg naar de kluis. Jullie hebben er ${state.solved.length}.</p></div></section>`;
+  if(!state.kluis) return `<section class="card" aria-label="De kluis">
+    <div class="eyebrow"><svg class="icon" style="width:18px;height:18px"><use href="#i-key"/></svg>Laatste slot</div>
+    <h2>De kluis van de smid</h2>
+    <p>De smid wijst naar een ijzeren kluis met een cijferslot van vier cijfers. Hij zegt alleen dit:</p>
+    <div class="note"><svg class="icon"><use href="#i-book"/></svg><p><strong>Raadsel van de smid</strong>"Het jaar waarin de Engelsen de tartan verboden, plus het aantal jaren dat dat verbod duurde. Jullie zijn er onderweg al langs gekomen."</p></div>
+    <p class="muted" style="font-size:14px">Tip: blader terug door de weetjes van de haltes. Alles wat jullie nodig hebben, staat daar.</p>
+    <div class="tokens">${STATIONS.map(s=>`<span class="token got">${s.token}</span>`).join("")}</div>
+    <div class="answer">
+      <label for="ans-k" class="eyebrow">Code van de kluis</label>
+      <input id="ans-k" autocomplete="off" inputmode="numeric" placeholder="4 cijfers">
+      <div class="feedback" id="fb-k"></div>
+      <button class="btn btn-primary" id="check-k">Open de kluis</button>
+      ${state.hints.k?`<div class="hintbox">Hint: Skye. 1746 + 36.</div>`:`<button class="tl-link" id="hint-k">Geef een hint <svg class="icon" style="width:16px;height:16px"><use href="#i-arrow"/></svg></button>`}
+    </div>
+  </section>`;
+  return `<section class="card" aria-label="Geopend">
+    <div class="duo"><img class="avatar lg" src="yenthe.jpg" alt=""><img class="avatar lg" src="renaat.jpg" alt=""></div>
+    <div class="eyebrow" style="justify-content:center">De kluis is open</div>
+    <h1 style="text-align:center;font-size:clamp(2rem,10vw,2.8rem)">Een hamerslag <em>op het aambeeld</em></h1>
+    <p class="lead" style="text-align:center">Zes haltes, zes woorden, één sleutel. Jullie deden er ${elapsed()} over.</p>
+    <div class="tokens" style="justify-content:center">${STATIONS.map(s=>`<span class="token got">${s.token}</span>`).join("")}</div>
+    <p class="muted" style="font-size:14px;text-align:center">Welkom · water · familie · gezondheid · leven · liefde. Genoeg Gaelic voor een hele huwelijksreis. En 1782 was echt het jaar waarin de kilt weer mocht.</p>
+    <div class="note"><svg class="icon"><use href="#i-key"/></svg><p><strong>Voor ${CONFIG.bruid} &amp; ${CONFIG.bruidegom}</strong><span class="letter">${CONFIG.slotbrief}</span><br><span class="muted">— ${CONFIG.afzender}</span></p></div>
+    <button class="btn btn-secondary" id="reset">Opnieuw spelen</button>
+  </section>`;
+}
 
 function render(){
-  if(!state.role){ bar.hidden=true; renderStart(); return; }
-  bar.hidden=false; meta.textContent=roleLabel()+" · "+elapsed();
-  if(state.step>=STATIONS.length){ renderFinal(); return; }
-  renderStation(STATIONS[state.step]);
+  const keep = state.page;
+  track.innerHTML = coverCard() + STATIONS.map((s,i)=>stationCard(i)).join("") + finalCard();
+  dots.innerHTML = Array.from({length:N},(_,p)=>`<button class="dot ${p>0&&p<N-1&&state.solved.includes(p-1)?'done':''} ${unlocked(p)?'':'lock'}" data-page="${p}" aria-label="Kaart ${p+1}" ${p===keep?'aria-current="true"':''}></button>`).join("");
+  bind(); goTo(keep,false);
 }
-
-function renderStart(){
-  app.innerHTML=`
-   <div class="hero">
-    <span class="eyebrow">Online escape game · Schotland</span>
-    <h1>An Iuchair <em>Albannach</em></h1>
-    <p class="muted" style="font-size:14px;letter-spacing:.06em;margin-top:-6px">De Schotse Sleutel</p>
-    <p class="muted" style="font-size:14px">Een missie voor ${CONFIG.bruid} &amp; ${CONFIG.bruidegom}</p>
-    <div class="tartan"></div>
-    <p>Zes haltes van Edinburgh tot Gretna Green. Bij elke halte krijgt ieder van jullie de helft van de aanwijzing. Alleen samen vinden jullie de code die de kluis van de smid opent.</p>
-    <p class="muted">Speel elk op je eigen gsm en kies je rol, of speel samen op één toestel. Jullie mogen alles aan elkaar vertellen. Jullie mogen ook niets opzoeken, maar dat controleert niemand.</p>
-   </div>
-   <div class="roles">
-    <button class="btn a" data-role="a"><img class="avatar" src="yenthe.jpg" alt=""><span>${CONFIG.bruid}<small>Ik zie de voorwerpen, kaarten en etiketten</small></span></button>
-    <button class="btn b" data-role="b"><img class="avatar" src="renaat.jpg" alt=""><span>${CONFIG.bruidegom}<small>Ik zie de reglementen, logboeken en legendes</small></span></button>
-    <button class="btn both" data-role="both"><span>Samen op één gsm<small>Alle aanwijzingen op één scherm</small></span></button>
-   </div>
-   <p class="muted" style="font-size:14px">Met liefde in elkaar gezet door ${CONFIG.afzender}. <em>Fàilte gu Alba</em> is Gaelic voor 'welkom in Schotland'.</p>`;
-  app.querySelectorAll("[data-role]").forEach(b=>b.addEventListener("click",()=>{ state.role=b.dataset.role; state.start=state.start||Date.now(); save(); render(); window.scrollTo(0,0); }));
+function goTo(p, smooth=true){
+  p=Math.max(0,Math.min(N-1,p));
+  if(!unlocked(p)){ // naar de laatste toegankelijke
+    while(p>0 && !unlocked(p)) p--;
+  }
+  state.page=p; save();
+  track.scrollTo({left:p*track.clientWidth, behavior:smooth?"smooth":"auto"});
+  updateNav();
 }
-
-function clueCard(st, who){
-  const mine = state.role===who || state.role==="both";
-  const name = who==="a"?CONFIG.bruid:CONFIG.bruidegom;
-  const img=who==="a"?"yenthe.jpg":"renaat.jpg";
-  const head=`<div class="who role-${who}"><img class="avatar" src="${img}" alt=""><span class="role-tag role-${who}">Aanwijzing van ${name}</span></div>`;
-  if(mine) return `<div class="card mine">${head}<div class="clue">${who==="a"?st.a:st.b}</div></div>`;
-  return `<div class="card theirs">${head}<p class="muted">Dit deel staat alleen op de gsm van ${name}. Vraag ernaar, of leg jullie schermen naast elkaar.</p></div>`;
+function updateNav(){
+  const p=state.page;
+  prevB.disabled = p===0;
+  nextB.disabled = p===N-1 || !unlocked(p+1);
+  dots.querySelectorAll(".dot").forEach(d=>d.setAttribute("aria-current", +d.dataset.page===p ? "true":"false"));
 }
-
-function renderStation(st){
-  const i=state.step, solved=state.solved.includes(i), hinted=!!state.hints[i];
-  app.innerHTML=`
-   <div class="route">${STATIONS.map((s,k)=>`<span class="${k<i?'done':k===i?'now':''}"></span>`).join("")}</div>
-   <div class="nav">
-    <button class="btn ghost small" id="back" ${i>0?"":"disabled"}>← Vorige</button>
-    <button class="btn ghost small" id="home">Startscherm</button>
-    <button class="btn ghost small" id="fwd" ${solved?"":"disabled"}>Volgende →</button>
-   </div>
-   <div class="hero" style="padding-block:4px">
-    <span class="eyebrow">Halte ${i+1} van ${STATIONS.length} · ${st.place}</span>
-    <p class="muted" style="font-size:13px;margin-top:-8px">${st.placeNl}</p>
-    <h2 style="font-size:32px">${st.title}</h2>
-    <p>${st.intro}</p>
-   </div>
-   <div class="card fact"><span class="eyebrow" style="color:var(--gold)">Wist je dat</span><p>${st.fact}</p></div>
-   ${clueCard(st,"a")}
-   ${clueCard(st,"b")}
-   ${solved ? solvedBlock(st,i) : `
-   <div class="card answer">
-    <label for="ans-${i}" class="eyebrow" style="color:var(--heather)">Jullie antwoord</label>
-    <input id="ans-${i}" autocomplete="off" autocapitalize="characters" inputmode="${/^\d+$/.test(st.answer)?'numeric':'text'}" placeholder="${/^\d+$/.test(st.answer)?'cijfers':'woord'}">
-    <div class="feedback" id="fb"></div>
-    <button class="btn" id="check">Controleer</button>
-    ${hinted?`<div class="hintbox">Hint: ${st.hint}</div>`:`<button class="btn ghost small" id="hint" style="justify-self:center">Geef een hint</button>`}
-   </div>`}
-   <div class="tokens">${STATIONS.map((s,k)=>`<span class="token ${state.solved.includes(k)?'':'locked'}">${state.solved.includes(k)?s.token:'·····'}</span>`).join("")}</div>
-`;
-
-  const input=app.querySelector("#ans-"+i), fb=app.querySelector("#fb");
-  const check=()=>{
-    if(norm(input.value)===norm(st.answer)){ state.solved.push(i); save(); render(); window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"}); }
-    else{ fb.className="feedback bad"; fb.textContent="Dat is het niet. Overleg nog eens, of vraag een hint."; input.classList.remove("shake"); void input.offsetWidth; input.classList.add("shake"); }
-  };
-  app.querySelector("#check")?.addEventListener("click",check);
-  input?.addEventListener("keydown",e=>{ if(e.key==="Enter") check(); });
-  app.querySelector("#hint")?.addEventListener("click",()=>{ state.hints[i]=true; save(); render(); });
-  app.querySelector("#next")?.addEventListener("click",()=>{ state.step=i+1; save(); render(); window.scrollTo(0,0); });
-  app.querySelector("#back")?.addEventListener("click",()=>{ if(i>0){ state.step=i-1; save(); render(); window.scrollTo(0,0); } });
-  app.querySelector("#fwd")?.addEventListener("click",()=>{ if(solved){ state.step=i+1; save(); render(); window.scrollTo(0,0); } });
-  app.querySelector("#home")?.addEventListener("click",()=>{ state.role=null; save(); render(); window.scrollTo(0,0); });
+function bind(){
+  track.querySelectorAll("[data-role]").forEach(b=>b.addEventListener("click",()=>{ state.role=b.dataset.role; state.start=state.start||Date.now(); state.page=1; save(); render(); }));
+  track.querySelectorAll("[data-check]").forEach(b=>b.addEventListener("click",()=>check(+b.dataset.check)));
+  track.querySelectorAll(".answer input").forEach(inp=>inp.addEventListener("keydown",e=>{ if(e.key==="Enter") check(+inp.id.split("-")[1]); }));
+  track.querySelectorAll("[data-hint]").forEach(b=>b.addEventListener("click",()=>{ state.hints[b.dataset.hint]=true; save(); render(); }));
+  track.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>goTo(+b.dataset.go)));
+  track.querySelector("#check-k")?.addEventListener("click",checkK);
+  track.querySelector("#ans-k")?.addEventListener("keydown",e=>{ if(e.key==="Enter") checkK(); });
+  track.querySelector("#hint-k")?.addEventListener("click",()=>{ state.hints.k=true; save(); render(); });
+  track.querySelector("#reset")?.addEventListener("click",()=>{ state={role:null,solved:[],start:null,hints:{},page:0,kluis:false}; save(); render(); });
+  dots.querySelectorAll(".dot").forEach(d=>d.addEventListener("click",()=>goTo(+d.dataset.page)));
 }
-
-function solvedBlock(st,i){
-  return `<div class="card solved">
-    <span class="eyebrow" style="color:var(--ok)">Opgelost</span>
-    <div class="big">${st.token}</div>
-    <p class="muted">Gaelic voor <em>${st.tokenNl}</em>. Jullie ${i+1}e woord.</p>
-    <p>${st.reveal}</p>
-    <button class="btn" id="next">${i+1<STATIONS.length?"Naar "+STATIONS[i+1].placeNl+" →":"Open de kluis"}</button>
-   </div>`;
+function checkK(){
+  const inp=track.querySelector("#ans-k"), fb=track.querySelector("#fb-k");
+  if(norm(inp.value)==="1782"){ state.kluis=true; save(); render(); }
+  else{ fb.className="feedback bad"; fb.textContent="De kluis blijft dicht. Zoek het jaartal en de duur in de weetjes."; inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake"); }
 }
-
-function renderFinal(){
-  app.innerHTML=`
-   <div class="route">${STATIONS.map(()=>`<span class="done"></span>`).join("")}</div>
-   <div class="hero final">
-    <div class="duo"><img class="avatar lg" src="yenthe.jpg" alt=""><img class="avatar lg" src="renaat.jpg" alt=""></div>
-    <span class="eyebrow">De kluis van de smid</span>
-    <h1>Een hamerslag op het aambeeld.</h1>
-    <div class="tartan"></div>
-    <p>Zes haltes, zes woorden, één sleutel. Jullie deden er ${elapsed()} over.</p>
-   </div>
-   <div class="tokens">${STATIONS.map(s=>`<span class="token">${s.token}</span>`).join("")}</div>
-   <div class="card"><p class="muted" style="font-size:14px">Fàilte · Uisge · Clann · Slàinte · Beatha · Gràdh: welkom, water, familie, gezondheid, leven, liefde. Genoeg Gaelic voor een hele huwelijksreis.</p></div>
-   <div class="card fact"><span class="eyebrow">Voor ${CONFIG.bruid} &amp; ${CONFIG.bruidegom}</span><p class="letter">${CONFIG.slotbrief}</p><p class="muted">— ${CONFIG.afzender}</p></div>
-   <div class="actions">
-    <button class="btn ghost small" id="reset">Opnieuw spelen</button>
-   </div>`;
-  app.querySelector("#reset").addEventListener("click",()=>{ state={role:null,step:0,solved:[],start:null,hints:{}}; save(); render(); window.scrollTo(0,0); });
+function check(i){
+  const inp=track.querySelector("#ans-"+i), fb=track.querySelector("#fb-"+i);
+  if(norm(inp.value)===norm(STATIONS[i].answer)){ state.solved.push(i); state.page=i+1; save(); render(); const el=track.querySelectorAll(".card")[i+1]?.querySelector(".solved"); el?.scrollIntoView({block:"start",behavior:"smooth"}); }
+  else{ fb.className="feedback bad"; fb.textContent="Dat is het niet. Overleg nog eens, of vraag een hint."; inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake"); }
 }
-
+prevB.addEventListener("click",()=>goTo(state.page-1));
+nextB.addEventListener("click",()=>goTo(state.page+1));
+let t; track.addEventListener("scroll",()=>{ clearTimeout(t); t=setTimeout(()=>{ const p=Math.round(track.scrollLeft/track.clientWidth); if(p!==state.page){ if(unlocked(p)){ state.page=p; save(); updateNav(); } else goTo(state.page); } },80); });
+window.addEventListener("resize",()=>goTo(state.page,false));
 render();
 </script>
 
