@@ -112,6 +112,28 @@ p{margin:0}
 .cask b{display:block;font-family:var(--font-display);font-size:26px;color:var(--accent-text)}
 .cask small{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
 .quaich{display:grid;place-items:center;padding:4px 0}
+/* prijs */
+.prize{margin:0;display:grid;gap:8px;justify-items:center;text-align:center}
+.prize svg{width:min(78%,260px);height:auto;filter:drop-shadow(0 10px 24px rgba(0,0,0,.45))}
+.prize figcaption{font-size:14px;color:var(--accent-text);font-style:italic}
+.pz-glow{animation:pulse 3.2s ease-in-out infinite}
+.pz-crown{transform-origin:120px 70px;animation:crown 1.1s cubic-bezier(.2,1.4,.4,1) both}
+.pz-hearts{transform-origin:120px 170px;animation:pop .9s .25s cubic-bezier(.2,1.4,.4,1) both}
+.pz-key{transform-origin:120px 262px;animation:pop .9s .5s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes crown{from{transform:translateY(-40px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:30}
+/* figuurtjes */
+.critter{position:fixed;bottom:calc(74px + env(safe-area-inset-bottom,0px));left:-90px;width:64px;height:64px;pointer-events:none;z-index:25;animation:walk var(--dur,14s) linear forwards}
+.critter.flip{transform:scaleX(-1)}
+.critter svg{width:100%;height:100%;animation:waddle .5s ease-in-out infinite alternate;transform-origin:50% 100%}
+.critter.hop svg{animation:hop .7s cubic-bezier(.4,0,.6,1) infinite}
+@keyframes walk{from{transform:translateX(0)}to{transform:translateX(calc(100vw + 180px))}}
+@keyframes waddle{from{transform:rotate(-7deg) translateY(0)}to{transform:rotate(7deg) translateY(-2px)}}
+@keyframes hop{0%,100%{transform:translateY(0) scaleY(1)}30%{transform:translateY(-26px) scaleY(1.05)}60%{transform:translateY(0) scaleY(.92)}}
+.nessie{position:absolute;right:18px;bottom:40px;width:120px;height:60px;pointer-events:none;opacity:.9;animation:bob 4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 /* nav */
 .nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .nav-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer}
@@ -123,7 +145,7 @@ p{margin:0}
 .dot[aria-current="true"]::after{width:22px;background:var(--accent)}
 .dot.lock{opacity:.4}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.track{scroll-behavior:auto}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.track{scroll-behavior:auto}.critter{display:none}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -141,6 +163,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
  </defs>
 </svg>
 
+<canvas id="confetti" hidden></canvas>
 <main class="app">
   <div class="track" id="track" tabindex="0" aria-label="Escape game, veeg naar links of rechts"></div>
   <nav class="nav">
@@ -157,11 +180,9 @@ const CONFIG = {
   afzender: "Quinten & Jente",  // wie het cadeau geeft
   slotbrief: `Jullie hebben An Iuchair Albannach gevonden: de Schotse Sleutel.
 
-Bij onze trouw kregen wij van jullie een Ierse geluksmunt en een gelukshanger. Dit keer reizen de gelukssymbolen met jullie mee naar Schotland.
+Bij onze trouw gaven jullie ons een Ierse geluksmunt en een gelukshanger. Die hebben hun werk gedaan. Daarom zochten wij voor jullie een Schots geluksteken: de luckenbooth, twee verstrengelde hartjes met een kroon, die al 300 jaar in Schotland aan een geliefde wordt gegeven als teken van trouw en geluk.
 
-Zoek daar de luckenbooth: twee hartjes met een kroon, het Schotse teken van trouw dat al 300 jaar aan een geliefde wordt gegeven. Dat is onze volgende schakel in de traditie.
-
-Veel geluk op de reis en op de rest van de weg samen.
+Neem hem in gedachten mee op jullie reis, en op de rest van de weg samen.
 Slàinte mhath!`
 };
 // ────────────────────────────────
@@ -271,27 +292,25 @@ const STATIONS = [
     reveal:"Schotland telt meer dan 140 werkende distilleerderijen. Het grootste deel van de whisky die er rijpt, is ouder dan de mensen die hem bottelen. Op Speyside kun je bij de meeste gewoon binnenlopen voor een proeverij."
   },
   {
-    place:"Gretna Green", placeNl:"het dorp van de smid", title:"De smid en de beker", token:"Gràdh", tokenNl:"liefde",
-    intro:"Jullie laatste halte ligt net over de Engelse grens: het dorp waar al 270 jaar stiekem getrouwd wordt. De smid wacht bij het aambeeld, maar hij spreekt alleen wie de naam van het voorwerp op zijn tafel kent.",
-    fact:"Sinds 1754 vluchtten jonge Engelse stellen naar Gretna Green, omdat je in Schotland zonder toestemming van je ouders mocht trouwen. De smid voltrok het huwelijk met een hamerslag op het aambeeld. Die 'anvil priests' trouwden tot 5.000 stellen per jaar.",
-    a:`<p>Jij ziet het voorwerp op tafel:</p>
-       <div class="quaich">
-        <svg viewBox="0 0 220 110" width="220" height="110" role="img" aria-label="Lage beker met twee handvatten">
-         <path d="M40 40 H180 L165 85 Q110 100 55 85 Z" fill="#d9a441"/>
-         <path d="M40 40 H180" stroke="#f3d58a" stroke-width="4"/>
-         <path d="M40 46 H6 V62 H44" fill="none" stroke="#d9a441" stroke-width="10" stroke-linecap="round"/>
-         <path d="M180 46 H214 V62 H176" fill="none" stroke="#d9a441" stroke-width="10" stroke-linecap="round"/>
-         <ellipse cx="110" cy="40" rx="70" ry="9" fill="#b8832a"/>
-        </svg>
+    place:"Gretna Green", placeNl:"het dorp van de smid", title:"Het register van de smid", token:"Gràdh", tokenNl:"liefde",
+    intro:"Jullie laatste halte ligt net over de Engelse grens: het dorp waar al 270 jaar stiekem getrouwd wordt. De smid trouwde elk stel met hamerslagen op het aambeeld, en noteerde alles. Zijn register en zijn dagboek liggen in twee verschillende handen.",
+    fact:"Sinds 1754 vluchtten jonge Engelse stellen naar Gretna Green, omdat je in Schotland zonder toestemming van je ouders mocht trouwen. De smid voltrok het huwelijk met een hamerslag op het aambeeld. Die 'anvil priests' trouwden tot 5.000 stellen per jaar. Het Gaelic alfabet dat ze spraken telt maar 18 letters.",
+    a:`<p>Jij hebt het register van de smid: per bruid het aantal hamerslagen op het aambeeld.</p>
+       <div class="legend" style="grid-template-columns:1fr">
+        <div><span>Bruid Fraser</span><b>3</b></div>
+        <div><span>Bruid Stewart</span><b>7</b></div>
+        <div><span>Bruid Reid</span><b>4</b></div>
+        <div><span>Bruid Wallace</span><b>9</b></div>
+        <div><span>Bruid Douglas</span><b>2</b></div>
        </div>
-       <p>Een lage beker met twee oren. Het bruidspaar drinkt er tijdens de ceremonie samen uit: een hand per oor.</p>
-       <p class="muted" style="font-size:14px">Op een kaartje bij de beker: <em>"Het Gaelic alfabet telt maar 18 letters. Geen J, K, Q, V, W, X, Y of Z."</em></p>`,
-    b:`<p>Jij hebt de rekening van de smid, met het woord erop in zijn eigen spelling:</p>
-       <p style="font-family:var(--font-display);font-size:26px;color:var(--accent-text)">C U A C H</p>
-       <p><em>"Zo schrijven de Gaels het. De Schotten schrijven dezelfde beginklank met een letter die de Gaels niet kennen, gevolgd door een U. Zes letters in totaal."</em></p>`,
-    hint:"De eerste C wordt een letter die niet in het Gaelic alfabet bestaat en als 'kw' klinkt. Daarna gewoon U-A-I-C-H... bijna: de A wordt AI.",
-    answer:"QUAICH",
-    reveal:"De smid knikt. Maar de kluis achter hem heeft nog een cijferslot. Veeg door."
+       <p class="muted" style="font-size:14px">De code is drie cijfers lang: drie bruiden, drie getallen.</p>`,
+    b:`<p>Jij hebt het dagboek van de smid, januari 1830:</p>
+       <p><em>"Op Burns Night zelf kwam een stel uit Carlisle; zij heette Stewart. De dag erna een stel uit Londen, zij heette Wallace. Drie dagen na Wallace een stel uit York, zij heette Reid. Op de laatste dag van de maand kwam Douglas, maar haar vader was sneller: geen hamerslag."</em></p>
+       <p><em>"De code van mijn kluis: de slagen van de bruid van 26 januari, dan die van 25 januari, dan die van 29 januari."</em></p>
+       <p class="muted" style="font-size:14px">Wanneer Burns Night valt, hebben jullie onderweg al gelezen.</p>`,
+    hint:"Burns Night is 25 januari (zie Inverness). 26 jan = Wallace, 25 jan = Stewart, 29 jan = Reid. Zoek hun slagen in het register.",
+    answer:"974",
+    reveal:"De smid knikt. Maar de kluis achter hem heeft nog een cijferslot van vier cijfers, en de sleutel daarvoor ligt verspreid over jullie hele reis. Veeg door."
   }
 ];
 
@@ -353,6 +372,7 @@ function stationCard(i){
     <h2>${st.place}</h2>
     <h3 style="color:var(--accent-text)">${st.title}</h3>
     <p>${st.intro}</p>
+    ${i===1?`<div class="note" style="position:relative;min-height:84px;overflow:hidden"><svg class="icon"><use href="#i-eye"/></svg><p><strong>Iets beweegt</strong>In de verte, in het zwarte water...</p><svg class="nessie" viewBox="0 0 120 60" aria-hidden="true"><path d="M8 50 Q20 20 40 42 Q58 20 76 42 Q92 20 104 44" fill="none" stroke="#2d5b3e" stroke-width="10" stroke-linecap="round"/><path d="M104 44 Q112 20 100 8 Q90 4 86 14 L84 24" fill="none" stroke="#2d5b3e" stroke-width="9" stroke-linecap="round"/><circle cx="94" cy="12" r="2.4" fill="#F5F7FA"/><path d="M0 52 Q60 44 120 52 L120 60 L0 60Z" fill="#1E3854" opacity=".9"/></svg></div>`:""}
     <div class="note"><svg class="icon"><use href="#i-star"/></svg><p><strong>Wist je dat</strong>${st.fact}</p></div>
     ${clueBlock(st,"a")}${clueBlock(st,"b")}
     ${solved ? `<div class="solved"><div class="eyebrow" style="justify-content:center;color:var(--ok)">Opgelost</div><div class="big">${st.token}</div><p class="muted">Gaelic voor <em>${st.tokenNl}</em>. Jullie ${i+1}e woord.</p><p style="font-size:15px">${st.reveal}</p><button class="btn btn-primary" data-go="${i+2}">${i+1<STATIONS.length?"Naar "+STATIONS[i+1].placeNl:"Open de kluis"} <svg class="icon"><use href="#i-arrow"/></svg></button></div>`
@@ -373,24 +393,50 @@ function finalCard(){
     <div class="eyebrow"><svg class="icon" style="width:18px;height:18px"><use href="#i-key"/></svg>Laatste slot</div>
     <h2>De kluis van de smid</h2>
     <p>De smid wijst naar een ijzeren kluis met een cijferslot van vier cijfers. Hij zegt alleen dit:</p>
-    <div class="note"><svg class="icon"><use href="#i-book"/></svg><p><strong>Raadsel van de smid</strong>"Het jaar waarin de Engelsen de tartan verboden, plus het aantal jaren dat dat verbod duurde. Jullie zijn er onderweg al langs gekomen."</p></div>
-    <p class="muted" style="font-size:14px">Tip: blader terug door de weetjes van de haltes. Alles wat jullie nodig hebben, staat daar.</p>
+    <div class="note"><svg class="icon"><use href="#i-book"/></svg><p><strong>Raadsel van de smid</strong>"Drie getallen liggen verspreid over jullie reis:<br>· zoveel jaar moest de kilt zwijgen,<br>· zo hoog, in meter, staan de stalen paarden,<br>· zoveel letters telt het alfabet van de Gaels.<br>Vermenigvuldig het eerste met het tweede en tel het derde erbij."</p></div>
+    <p class="muted" style="font-size:14px">Blader terug door de weetjes én de teksten die na elke oplossing verschenen. De drie getallen staan op drie verschillende kaarten.</p>
     <div class="tokens">${STATIONS.map(s=>`<span class="token got">${s.token}</span>`).join("")}</div>
     <div class="answer">
       <label for="ans-k" class="eyebrow">Code van de kluis</label>
       <input id="ans-k" autocomplete="off" inputmode="numeric" placeholder="4 cijfers">
       <div class="feedback" id="fb-k"></div>
       <button class="btn btn-primary" id="check-k">Open de kluis</button>
-      ${state.hints.k?`<div class="hintbox">Hint: Skye. 1746 + 36.</div>`:`<button class="tl-link" id="hint-k">Geef een hint <svg class="icon" style="width:16px;height:16px"><use href="#i-arrow"/></svg></button>`}
+      ${state.hints.k?`<div class="hintbox">Hint: Skye (het verbod), Loch Ness (de kelpies na het oplossen), Gretna Green (het alfabet). 36 × 30 + 18.</div>`:`<button class="tl-link" id="hint-k">Geef een hint <svg class="icon" style="width:16px;height:16px"><use href="#i-arrow"/></svg></button>`}
     </div>
   </section>`;
   return `<section class="card" aria-label="Geopend">
-    <div class="duo"><img class="avatar lg" src="yenthe.jpg" alt=""><img class="avatar lg" src="renaat.jpg" alt=""></div>
     <div class="eyebrow" style="justify-content:center">De kluis is open</div>
+    <figure class="prize">
+      <svg viewBox="0 0 240 300" role="img" aria-label="Luckenbooth: twee verstrengelde harten met een kroon, en de Schotse sleutel">
+        <defs>
+          <linearGradient id="gld" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0D98A"/><stop offset=".5" stop-color="#C9A45C"/><stop offset="1" stop-color="#8E6F2E"/></linearGradient>
+          <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#D2BF92" stop-opacity=".45"/><stop offset="1" stop-color="#D2BF92" stop-opacity="0"/></radialGradient>
+        </defs>
+        <circle class="pz-glow" cx="120" cy="150" r="120" fill="url(#glow)"/>
+        <g class="pz-crown" fill="url(#gld)" stroke="#5a4515" stroke-width="2" stroke-linejoin="round">
+          <path d="M70 92 L80 52 L100 76 L120 40 L140 76 L160 52 L170 92 Z"/>
+          <rect x="68" y="90" width="104" height="14" rx="4"/>
+          <circle cx="80" cy="50" r="5"/><circle cx="120" cy="38" r="6"/><circle cx="160" cy="50" r="5"/>
+          <circle cx="92" cy="97" r="3" fill="#9b2c2c"/><circle cx="120" cy="97" r="3" fill="#1f3a66"/><circle cx="148" cy="97" r="3" fill="#2d5b3e"/>
+        </g>
+        <g class="pz-hearts" fill="none" stroke="url(#gld)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+          <path transform="translate(104 170) rotate(-18)" d="M0,-30 C-26,-62 -74,-24 0,46 C74,-24 26,-62 0,-30 Z"/>
+          <path transform="translate(136 170) rotate(18)" d="M0,-30 C-26,-62 -74,-24 0,46 C74,-24 26,-62 0,-30 Z"/>
+        </g>
+        <g class="pz-key" fill="url(#gld)" stroke="#5a4515" stroke-width="1.5">
+          <circle cx="60" cy="262" r="16" fill="none" stroke="url(#gld)" stroke-width="9"/>
+          <rect x="74" y="257" width="110" height="10" rx="4"/>
+          <rect x="160" y="265" width="9" height="14" rx="2"/><rect x="176" y="265" width="9" height="18" rx="2"/>
+        </g>
+      </svg>
+      <figcaption>De luckenbooth, met de Schotse sleutel. Jullie prijs uit de kluis.</figcaption>
+    </figure>
+    <div class="duo"><img class="avatar lg" src="yenthe.jpg" alt=""><img class="avatar lg" src="renaat.jpg" alt=""></div>
+    <button class="btn btn-secondary" id="music" aria-pressed="true">Muziek uit</button>
     <h1 style="text-align:center;font-size:clamp(2rem,10vw,2.8rem)">Een hamerslag <em>op het aambeeld</em></h1>
     <p class="lead" style="text-align:center">Zes haltes, zes woorden, één sleutel. Jullie deden er ${elapsed()} over.</p>
     <div class="tokens" style="justify-content:center">${STATIONS.map(s=>`<span class="token got">${s.token}</span>`).join("")}</div>
-    <p class="muted" style="font-size:14px;text-align:center">Welkom · water · familie · gezondheid · leven · liefde. Genoeg Gaelic voor een hele huwelijksreis. En 1782 was echt het jaar waarin de kilt weer mocht.</p>
+    <p class="muted" style="font-size:14px;text-align:center">Welkom · water · familie · gezondheid · leven · liefde. Genoeg Gaelic voor een hele huwelijksreis.</p>
     <div class="note"><svg class="icon"><use href="#i-key"/></svg><p><strong>Voor ${CONFIG.bruid} &amp; ${CONFIG.bruidegom}</strong><span class="letter">${CONFIG.slotbrief}</span><br><span class="muted">— ${CONFIG.afzender}</span></p></div>
     <button class="btn btn-secondary" id="reset">Opnieuw spelen</button>
   </section>`;
@@ -426,13 +472,14 @@ function bind(){
   track.querySelector("#check-k")?.addEventListener("click",checkK);
   track.querySelector("#ans-k")?.addEventListener("keydown",e=>{ if(e.key==="Enter") checkK(); });
   track.querySelector("#hint-k")?.addEventListener("click",()=>{ state.hints.k=true; save(); render(); });
-  track.querySelector("#reset")?.addEventListener("click",()=>{ state={role:null,solved:[],start:null,hints:{},page:0,kluis:false}; save(); render(); });
+  track.querySelector("#music")?.addEventListener("click",e=>toggleMusic(e.currentTarget));
+  track.querySelector("#reset")?.addEventListener("click",()=>{ stopMusic(); state={role:null,solved:[],start:null,hints:{},page:0,kluis:false}; save(); render(); });
   dots.querySelectorAll(".dot").forEach(d=>d.addEventListener("click",()=>goTo(+d.dataset.page)));
 }
 function checkK(){
   const inp=track.querySelector("#ans-k"), fb=track.querySelector("#fb-k");
-  if(norm(inp.value)==="1782"){ state.kluis=true; save(); render(); }
-  else{ fb.className="feedback bad"; fb.textContent="De kluis blijft dicht. Zoek het jaartal en de duur in de weetjes."; inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake"); }
+  if(norm(inp.value)==="1098"){ state.kluis=true; save(); render(); confetti(); startMusic(); for(let k=0;k<3;k++) setTimeout(spawnCritter,k*1200); }
+  else{ fb.className="feedback bad"; fb.textContent="De kluis blijft dicht. Drie getallen, drie kaarten, dan rekenen."; inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake"); }
 }
 function check(i){
   const inp=track.querySelector("#ans-"+i), fb=track.querySelector("#fb-"+i);
@@ -443,6 +490,63 @@ prevB.addEventListener("click",()=>goTo(state.page-1));
 nextB.addEventListener("click",()=>goTo(state.page+1));
 let t; track.addEventListener("scroll",()=>{ clearTimeout(t); t=setTimeout(()=>{ const p=Math.round(track.scrollLeft/track.clientWidth); if(p!==state.page){ if(unlocked(p)){ state.page=p; save(); updateNav(); } else goTo(state.page); } },80); });
 window.addEventListener("resize",()=>goTo(state.page,false));
+
+/* ---------- muziek: een vrolijke jig op doedelzakdrone, gesynthetiseerd ---------- */
+let AC=null, musicOn=true, musicTimer=null, droneNodes=[];
+function freq(n){ return 440*Math.pow(2,(n-69)/12); }
+function startMusic(){
+  if(!musicOn) return;
+  try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
+  if(AC.state==="suspended") AC.resume();
+  stopMusic(false);
+  const master=AC.createGain(); master.gain.value=0.16; master.connect(AC.destination);
+  // drone: A en E (bourdon van een doedelzak)
+  [57,64].forEach((n,k)=>{ const o=AC.createOscillator(), g=AC.createGain(), f=AC.createBiquadFilter(); o.type="sawtooth"; o.frequency.value=freq(n); f.type="lowpass"; f.frequency.value=900; g.gain.value=k?0.08:0.14; o.connect(f).connect(g).connect(master); o.start(); droneNodes.push(o,g,master); });
+  // jig in 6/8, A-mixolydisch (eigen melodie). [midi, duur in achtsten]
+  const A=[[69,1],[71,1],[73,1],[76,1],[73,1],[71,1],[69,1],[71,1],[73,1],[71,2],[69,1],
+           [69,1],[71,1],[73,1],[76,1],[78,1],[76,1],[73,2],[71,1],[69,3],
+           [76,1],[78,1],[80,1],[81,1],[80,1],[78,1],[76,1],[73,1],[76,1],[78,2],[76,1],
+           [73,1],[76,1],[73,1],[71,1],[73,1],[71,1],[69,2],[71,1],[69,3]];
+  const e=0.19; let t=AC.currentTime+0.1; const notes=[];
+  const play=()=>{
+    let tt=AC.currentTime+0.05;
+    A.forEach(([n,d])=>{ const o=AC.createOscillator(), g=AC.createGain(), f=AC.createBiquadFilter(); o.type="square"; o.frequency.value=freq(n); f.type="lowpass"; f.frequency.value=2200;
+      g.gain.setValueAtTime(0.0001,tt); g.gain.exponentialRampToValueAtTime(0.5,tt+0.015); g.gain.setValueAtTime(0.5,tt+d*e-0.04); g.gain.exponentialRampToValueAtTime(0.0001,tt+d*e);
+      o.connect(f).connect(g).connect(master); o.start(tt); o.stop(tt+d*e+0.02); tt+=d*e; });
+    musicTimer=setTimeout(play, (tt-AC.currentTime)*1000);
+  };
+  play();
+}
+function stopMusic(keepFlag=true){ clearTimeout(musicTimer); droneNodes.forEach(n=>{ try{ n.stop?n.stop():n.disconnect(); }catch(e){} }); droneNodes=[]; }
+function toggleMusic(btn){ musicOn=!musicOn; if(musicOn) startMusic(); else stopMusic(); btn.textContent=musicOn?"Muziek uit":"Muziek aan"; btn.setAttribute("aria-pressed",musicOn); }
+
+/* ---------- confetti in Schotse kleuren ---------- */
+function confetti(){
+  const c=document.getElementById("confetti"); if(!c) return;
+  const ctx=c.getContext("2d"); c.hidden=false; c.width=innerWidth; c.height=innerHeight;
+  const cols=["#005EB8","#FFFFFF","#A68D5A","#9b2c2c","#2d5b3e","#D2BF92"];
+  const ps=Array.from({length:160},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*0.6,w:6+Math.random()*6,h:8+Math.random()*8,c:cols[Math.random()*cols.length|0],vy:2+Math.random()*3,vx:(Math.random()-.5)*2,r:Math.random()*6.28,vr:(Math.random()-.5)*.25}));
+  const t0=performance.now();
+  (function frame(now){
+    ctx.clearRect(0,0,c.width,c.height);
+    ps.forEach(p=>{ p.y+=p.vy; p.x+=p.vx+Math.sin(now/300+p.r)*0.6; p.r+=p.vr; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); if(p.y>c.height+20 && now-t0<5500){ p.y=-20; p.x=Math.random()*c.width; } });
+    if(now-t0<8000) requestAnimationFrame(frame); else { c.hidden=true; }
+  })(t0);
+}
+
+/* ---------- papegaaiduikers die voorbij waggelen ---------- */
+const PUFFIN=`<svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="38" rx="18" ry="20" fill="#1b1b1f"/><ellipse cx="34" cy="42" rx="12" ry="15" fill="#f5f5f2"/><circle cx="34" cy="22" r="13" fill="#1b1b1f"/><circle cx="37" cy="23" r="9" fill="#f5f5f2"/><path d="M44 22 l14 2 -14 6 z" fill="#e8552f"/><path d="M44 24 l9 1.5 -9 3.5z" fill="#f4b23e"/><circle cx="36" cy="20" r="2" fill="#1b1b1f"/><path d="M26 56 l-5 5 h8z M36 56 l-5 5 h8z" fill="#e8552f"/><path d="M14 36 q-10 6 -2 14" fill="none" stroke="#1b1b1f" stroke-width="5" stroke-linecap="round"/></svg>`;
+function spawnCritter(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const d=document.createElement("div"); d.className="critter"+(Math.random()<0.35?" hop":"");
+  const dur=11+Math.random()*8; d.style.setProperty("--dur",dur+"s"); d.innerHTML=PUFFIN;
+  if(Math.random()<0.4){ d.style.left="auto"; d.style.right="-90px"; d.style.animationName="walkL"; }
+  document.body.appendChild(d); setTimeout(()=>d.remove(),dur*1000+500);
+}
+const st=document.createElement("style"); st.textContent="@keyframes walkL{from{transform:translateX(0) scaleX(-1)}to{transform:translateX(calc(-100vw - 180px)) scaleX(-1)}}"; document.head.appendChild(st);
+function scheduleCritter(){ setTimeout(()=>{ spawnCritter(); scheduleCritter(); }, 15000+Math.random()*25000); }
+setTimeout(spawnCritter, 4000); scheduleCritter();
+
 render();
 </script>
 
