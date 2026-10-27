@@ -136,7 +136,7 @@ p{margin:0}
 .loch .water{position:absolute;inset:0;background:linear-gradient(180deg,rgba(79,155,151,.55),rgba(19,37,57,.92))}
 .loch .wave{position:absolute;left:0;right:0;top:-18px;height:20px;width:200%;animation:waveslide 5s linear infinite}
 .loch .wave svg{display:block;width:100%;height:100%}
-.nessie{position:absolute;left:0;bottom:calc(100% - 92px);width:min(80vw,360px);height:auto;animation:swim var(--dur,13s) linear forwards}
+.nessie{position:absolute;left:0;bottom:calc(100% - 92px);width:min(80vw,360px);height:auto;animation:swim var(--dur,13s) linear both}
 .nessie svg{width:100%;height:auto;display:block;animation:bob 2.4s ease-in-out infinite;transform-origin:50% 100%}
 @keyframes rise{from{height:0}to{height:50vh}}
 @keyframes drain{to{height:0}}
@@ -548,23 +548,19 @@ function confetti(){
 }
 
 /* ---------- papegaaiduikers die voorbij waggelen ---------- */
-const NESSIE=`<svg viewBox="0 0 360 200" aria-hidden="true">
-  <!-- drie bulten -->
-  <path d="M10 170 C 10 118, 110 118, 110 170 Z" fill="#2f6b45"/>
-  <path d="M100 170 C 100 110, 210 110, 210 170 Z" fill="#2f6b45"/>
-  <path d="M200 170 C 200 124, 290 124, 290 170 Z" fill="#2f6b45"/>
-  <path d="M30 170 C 30 134, 92 134, 92 170" fill="none" stroke="#3f8a58" stroke-width="6" stroke-linecap="round"/>
-  <path d="M122 170 C 122 126, 190 126, 190 170" fill="none" stroke="#3f8a58" stroke-width="6" stroke-linecap="round"/>
-  <path d="M220 170 C 220 138, 272 138, 272 170" fill="none" stroke="#3f8a58" stroke-width="6" stroke-linecap="round"/>
-  <!-- nek, naar rechts -->
-  <path d="M278 170 C 282 120, 288 80, 300 52" fill="none" stroke="#2f6b45" stroke-width="30" stroke-linecap="round"/>
-  <!-- kop -->
-  <path d="M286 40 C 290 24, 312 18, 334 26 C 350 32, 354 44, 346 50 C 336 58, 310 60, 292 56 C 284 54, 282 48, 286 40 Z" fill="#2f6b45"/>
-  <path d="M346 50 l10 2 -8 6z" fill="#2f6b45"/>
-  <circle cx="318" cy="38" r="5" fill="#F5F7FA"/><circle cx="320" cy="38.5" r="2.6" fill="#1b1b1f"/>
-  <path d="M322 50 q8 3 14 -2" fill="none" stroke="#1b1b1f" stroke-width="1.8" stroke-linecap="round"/>
-  <path d="M296 28 l6 -16 6 14z M308 24 l6 -16 6 16z" fill="#245237"/>
-  <circle cx="300" cy="60" r="2.2" fill="#8fd1b0"/><circle cx="310" cy="66" r="1.6" fill="#8fd1b0"/>
+const NESSIE=`<svg viewBox="0 0 360 172" aria-hidden="true" style="overflow:hidden">
+  <!-- één doorlopend lijf dat golvend onder water duikt; de dips vallen buiten het beeld -->
+  <path d="M6 230 C 20 190, 30 170, 48 150 C 72 124, 118 124, 136 162 C 150 192, 160 196, 172 178 C 190 150, 236 136, 256 170 C 266 188, 274 184, 280 168 C 284 150, 288 120, 296 80" fill="none" stroke="#2f6b45" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M48 150 C 72 124, 118 124, 136 162 M172 178 C 190 150, 236 136, 256 170" fill="none" stroke="#3f8a58" stroke-width="8" stroke-linecap="round" opacity=".8"/>
+  <path d="M84 132 l0 -10 M106 130 l0 -12 M210 142 l0 -11 M232 144 l0 -10" stroke="#245237" stroke-width="5" stroke-linecap="round"/>
+  <!-- nek en kop, naar rechts -->
+  <path d="M292 100 C 294 80, 298 64, 304 50" fill="none" stroke="#2f6b45" stroke-width="30" stroke-linecap="round"/>
+  <path d="M288 40 C 292 24, 314 18, 336 26 C 352 32, 356 44, 348 50 C 338 58, 312 60, 294 56 C 286 54, 284 48, 288 40 Z" fill="#2f6b45"/>
+  <path d="M348 50 l10 2 -8 6z" fill="#2f6b45"/>
+  <circle cx="320" cy="38" r="5" fill="#F5F7FA"/><circle cx="322" cy="38.5" r="2.6" fill="#1b1b1f"/>
+  <path d="M324 50 q8 3 14 -2" fill="none" stroke="#1b1b1f" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M298 28 l6 -16 6 14z M310 24 l6 -16 6 16z" fill="#245237"/>
+  <circle cx="302" cy="60" r="2.2" fill="#8fd1b0"/><circle cx="312" cy="66" r="1.6" fill="#8fd1b0"/>
 </svg>`;
 let lochBusy=false;
 function lochScene(){
