@@ -132,9 +132,16 @@ p{margin:0}
 @keyframes walk{from{transform:translateX(0)}to{transform:translateX(calc(100vw + 180px))}}
 @keyframes waddle{from{transform:rotate(-7deg) translateY(0)}to{transform:rotate(7deg) translateY(-2px)}}
 @keyframes hop{0%,100%{transform:translateY(0) scaleY(1)}30%{transform:translateY(-26px) scaleY(1.05)}60%{transform:translateY(0) scaleY(.92)}}
-.nessie{position:fixed;left:0;top:0;width:min(78vw,340px);height:auto;pointer-events:none;z-index:24;animation:swim var(--dur,22s) linear forwards}
-.nessie svg{width:100%;height:auto;animation:bob 2.6s ease-in-out infinite;transform-origin:50% 100%}
-@keyframes swim{from{transform:translate(calc(100vw + 20px),var(--y,40vh))}to{transform:translate(-110%,var(--y,40vh))}}
+.loch{position:fixed;left:0;right:0;bottom:0;height:0;z-index:24;pointer-events:none;overflow:visible;animation:rise 1.6s cubic-bezier(.2,.8,.2,1) forwards, drain 1.8s ease-in var(--hold,14s) forwards}
+.loch .water{position:absolute;inset:0;background:linear-gradient(180deg,rgba(79,155,151,.55),rgba(19,37,57,.92))}
+.loch .wave{position:absolute;left:0;right:0;top:-18px;height:20px;width:200%;animation:waveslide 5s linear infinite}
+.loch .wave svg{display:block;width:100%;height:100%}
+.nessie{position:absolute;left:0;bottom:calc(100% - 92px);width:min(80vw,360px);height:auto;animation:swim var(--dur,13s) linear forwards}
+.nessie svg{width:100%;height:auto;display:block;animation:bob 2.4s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes rise{from{height:0}to{height:50vh}}
+@keyframes drain{to{height:0}}
+@keyframes waveslide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes swim{from{transform:translateX(-110%)}to{transform:translateX(calc(100vw + 20px))}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 /* nav */
 .nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -450,7 +457,7 @@ function render(){
   bind(); goTo(keep,false);
 }
 function goTo(p, smooth=true){
-  if(p===2 && state.page!==2) setTimeout(spawnNessie,1200);
+  if(p===2 && state.page!==2) setTimeout(lochScene,1500);
   p=Math.max(0,Math.min(N-1,p));
   if(!unlocked(p)){ // naar de laatste toegankelijke
     while(p>0 && !unlocked(p)) p--;
@@ -541,24 +548,35 @@ function confetti(){
 }
 
 /* ---------- papegaaiduikers die voorbij waggelen ---------- */
-const NESSIE=`<svg viewBox="0 0 340 170" aria-hidden="true">
-  <path d="M8 150 C 40 150, 50 120, 70 120 C 90 120, 95 95, 115 95 C 135 95, 140 125, 160 125 C 180 125, 185 90, 205 90 C 225 90, 232 128, 252 128 C 266 128, 272 110, 286 100" fill="none" stroke="#2d5b3e" stroke-width="30" stroke-linecap="round"/>
-  <path d="M8 150 C 40 150, 50 120, 70 120 C 90 120, 95 95, 115 95 C 135 95, 140 125, 160 125 C 180 125, 185 90, 205 90 C 225 90, 232 128, 252 128 C 266 128, 272 110, 286 100" fill="none" stroke="#3f7a52" stroke-width="16" stroke-linecap="round" stroke-dasharray="2 22" opacity=".7"/>
-  <path d="M286 100 C 300 80, 306 50, 296 28 C 290 16, 276 14, 268 24 C 262 32, 266 40, 262 46" fill="none" stroke="#2d5b3e" stroke-width="24" stroke-linecap="round"/>
-  <path d="M270 22 C 258 10, 240 12, 236 24 C 234 32, 240 36, 250 36 L 268 36" fill="#2d5b3e"/>
-  <path d="M236 30 l-12 4 12 2z" fill="#1f3f2a"/>
-  <circle cx="258" cy="24" r="4.5" fill="#F5F7FA"/><circle cx="259.5" cy="24.5" r="2.2" fill="#1b1b1f"/>
-  <path d="M250 34 q6 4 12 0" fill="none" stroke="#1b1b1f" stroke-width="1.6" stroke-linecap="round"/>
-  <path d="M300 30 l10 -16 2 18z M290 14 l6 -14 6 14z" fill="#1f3f2a"/>
-  <path d="M0 160 Q 40 150 80 160 T 160 160 T 240 160 T 320 160 L 340 160 L 340 170 L 0 170 Z" fill="#1E3854" opacity=".9"/>
-  <path d="M0 158 Q 40 148 80 158 T 160 158 T 240 158 T 320 158" fill="none" stroke="#4f9b97" stroke-width="2" opacity=".6"/>
+const NESSIE=`<svg viewBox="0 0 360 200" aria-hidden="true">
+  <!-- drie bulten -->
+  <path d="M10 170 C 10 118, 110 118, 110 170 Z" fill="#2f6b45"/>
+  <path d="M100 170 C 100 110, 210 110, 210 170 Z" fill="#2f6b45"/>
+  <path d="M200 170 C 200 124, 290 124, 290 170 Z" fill="#2f6b45"/>
+  <path d="M30 170 C 30 134, 92 134, 92 170" fill="none" stroke="#3f8a58" stroke-width="6" stroke-linecap="round"/>
+  <path d="M122 170 C 122 126, 190 126, 190 170" fill="none" stroke="#3f8a58" stroke-width="6" stroke-linecap="round"/>
+  <path d="M220 170 C 220 138, 272 138, 272 170" fill="none" stroke="#3f8a58" stroke-width="6" stroke-linecap="round"/>
+  <!-- nek, naar rechts -->
+  <path d="M278 170 C 282 120, 288 80, 300 52" fill="none" stroke="#2f6b45" stroke-width="30" stroke-linecap="round"/>
+  <!-- kop -->
+  <path d="M286 40 C 290 24, 312 18, 334 26 C 350 32, 354 44, 346 50 C 336 58, 310 60, 292 56 C 284 54, 282 48, 286 40 Z" fill="#2f6b45"/>
+  <path d="M346 50 l10 2 -8 6z" fill="#2f6b45"/>
+  <circle cx="318" cy="38" r="5" fill="#F5F7FA"/><circle cx="320" cy="38.5" r="2.6" fill="#1b1b1f"/>
+  <path d="M322 50 q8 3 14 -2" fill="none" stroke="#1b1b1f" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M296 28 l6 -16 6 14z M308 24 l6 -16 6 16z" fill="#245237"/>
+  <circle cx="300" cy="60" r="2.2" fill="#8fd1b0"/><circle cx="310" cy="66" r="1.6" fill="#8fd1b0"/>
 </svg>`;
-let nessieBusy=false;
-function spawnNessie(){
-  if(nessieBusy || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  nessieBusy=true; const d=document.createElement("div"); d.className="nessie"; const dur=20+Math.random()*8;
-  d.style.setProperty("--dur",dur+"s"); d.style.setProperty("--y",(28+Math.random()*30)+"vh"); d.innerHTML=NESSIE;
-  document.body.appendChild(d); setTimeout(()=>{ d.remove(); nessieBusy=false; },dur*1000+500);
+let lochBusy=false;
+function lochScene(){
+  if(lochBusy || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  lochBusy=true;
+  const d=document.createElement("div"); d.className="loch"; const dur=13, hold=dur+2;
+  d.style.setProperty("--hold",hold+"s");
+  d.innerHTML=`<div class="water"></div>
+    <div class="wave"><svg viewBox="0 0 800 20" preserveAspectRatio="none"><path d="M0 12 Q 50 0 100 12 T 200 12 T 300 12 T 400 12 T 500 12 T 600 12 T 700 12 T 800 12 V20 H0 Z" fill="rgba(79,155,151,.55)"/></svg></div>
+    <div class="nessie" style="--dur:${dur}s;animation-delay:1.4s">${NESSIE}</div>`;
+  document.body.appendChild(d);
+  setTimeout(()=>{ d.remove(); lochBusy=false; },(hold+2)*1000);
 }
 const PUFFIN=`<svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="38" rx="18" ry="20" fill="#1b1b1f"/><ellipse cx="34" cy="42" rx="12" ry="15" fill="#f5f5f2"/><circle cx="34" cy="22" r="13" fill="#1b1b1f"/><circle cx="37" cy="23" r="9" fill="#f5f5f2"/><path d="M44 22 l14 2 -14 6 z" fill="#e8552f"/><path d="M44 24 l9 1.5 -9 3.5z" fill="#f4b23e"/><circle cx="36" cy="20" r="2" fill="#1b1b1f"/><path d="M26 56 l-5 5 h8z M36 56 l-5 5 h8z" fill="#e8552f"/><path d="M14 36 q-10 6 -2 14" fill="none" stroke="#1b1b1f" stroke-width="5" stroke-linecap="round"/></svg>`;
 function spawnCritter(){
@@ -571,7 +589,7 @@ function spawnCritter(){
 const st=document.createElement("style"); st.textContent="@keyframes walkL{from{transform:translateX(0) scaleX(-1)}to{transform:translateX(calc(-100vw - 180px)) scaleX(-1)}}"; document.head.appendChild(st);
 function scheduleCritter(){ setTimeout(()=>{ spawnCritter(); scheduleCritter(); }, 15000+Math.random()*25000); }
 setTimeout(spawnCritter, 4000); scheduleCritter();
-(function schedNessie(){ setTimeout(()=>{ spawnNessie(); schedNessie(); }, 45000+Math.random()*45000); })();
+
 
 render();
 </script>
