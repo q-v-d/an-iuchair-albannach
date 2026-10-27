@@ -132,7 +132,9 @@ p{margin:0}
 @keyframes walk{from{transform:translateX(0)}to{transform:translateX(calc(100vw + 180px))}}
 @keyframes waddle{from{transform:rotate(-7deg) translateY(0)}to{transform:rotate(7deg) translateY(-2px)}}
 @keyframes hop{0%,100%{transform:translateY(0) scaleY(1)}30%{transform:translateY(-26px) scaleY(1.05)}60%{transform:translateY(0) scaleY(.92)}}
-.nessie{position:absolute;right:18px;bottom:40px;width:120px;height:60px;pointer-events:none;opacity:.9;animation:bob 4s ease-in-out infinite}
+.nessie{position:fixed;left:0;top:0;width:min(78vw,340px);height:auto;pointer-events:none;z-index:24;animation:swim var(--dur,22s) linear forwards}
+.nessie svg{width:100%;height:auto;animation:bob 2.6s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes swim{from{transform:translate(calc(100vw + 20px),var(--y,40vh))}to{transform:translate(-110%,var(--y,40vh))}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 /* nav */
 .nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -352,7 +354,6 @@ function coverCard(){
       <button class="rbtn" data-role="both"><span class="badge"><svg class="icon"><use href="#i-both"/></svg></span><span>Samen op één gsm<span class="x-sub">Alle aanwijzingen op één scherm</span></span><svg class="icon"><use href="#i-arrow"/></svg></button>
     </div>
     <div class="swipe"><span>Kies een rol en veeg door</span><svg class="icon"><use href="#i-arrow"/></svg></div>
-    <p class="muted" style="font-size:13px"><em>Fàilte gu Alba</em> is Gaelic voor 'welkom in Schotland'.</p>
     ${state.start?`<button class="btn btn-secondary" id="reset-cover">Spel resetten en opnieuw beginnen</button>`:""}
   </section>`;
 }
@@ -373,7 +374,6 @@ function stationCard(i){
     <h2>${st.place}</h2>
     <h3 style="color:var(--accent-text)">${st.title}</h3>
     <p>${st.intro}</p>
-    ${i===1?`<div class="note" style="position:relative;min-height:84px;overflow:hidden"><svg class="icon"><use href="#i-eye"/></svg><p><strong>Iets beweegt</strong>In de verte, in het zwarte water...</p><svg class="nessie" viewBox="0 0 120 60" aria-hidden="true"><path d="M8 50 Q20 20 40 42 Q58 20 76 42 Q92 20 104 44" fill="none" stroke="#2d5b3e" stroke-width="10" stroke-linecap="round"/><path d="M104 44 Q112 20 100 8 Q90 4 86 14 L84 24" fill="none" stroke="#2d5b3e" stroke-width="9" stroke-linecap="round"/><circle cx="94" cy="12" r="2.4" fill="#F5F7FA"/><path d="M0 52 Q60 44 120 52 L120 60 L0 60Z" fill="#1E3854" opacity=".9"/></svg></div>`:""}
     <div class="note"><svg class="icon"><use href="#i-star"/></svg><p><strong>Wist je dat</strong>${st.fact}</p></div>
     ${clueBlock(st,"a")}${clueBlock(st,"b")}
     ${solved ? `<div class="solved"><div class="eyebrow" style="justify-content:center;color:var(--ok)">Opgelost</div><div class="big">${st.token}</div><p class="muted">Gaelic voor <em>${st.tokenNl}</em>. Jullie ${i+1}e woord.</p><p style="font-size:15px">${st.reveal}</p><button class="btn btn-primary" data-go="${i+2}">${i+1<STATIONS.length?"Naar "+STATIONS[i+1].placeNl:"Open de kluis"} <svg class="icon"><use href="#i-arrow"/></svg></button></div>`
@@ -450,6 +450,7 @@ function render(){
   bind(); goTo(keep,false);
 }
 function goTo(p, smooth=true){
+  if(p===2 && state.page!==2) setTimeout(spawnNessie,1200);
   p=Math.max(0,Math.min(N-1,p));
   if(!unlocked(p)){ // naar de laatste toegankelijke
     while(p>0 && !unlocked(p)) p--;
@@ -480,7 +481,7 @@ function bind(){
 }
 function checkK(){
   const inp=track.querySelector("#ans-k"), fb=track.querySelector("#fb-k");
-  if(norm(inp.value)==="1098"){ state.kluis=true; save(); render(); confetti(); startMusic(); for(let k=0;k<3;k++) setTimeout(spawnCritter,k*1200); }
+  if(norm(inp.value)==="1098"){ state.kluis=true; save(); render(); confetti(); unlockAudio(); (AC&&AC.resume?AC.resume():Promise.resolve()).then(startMusic,startMusic); setTimeout(syncMusicBtn,800); for(let k=0;k<3;k++) setTimeout(spawnCritter,k*1200); }
   else{ fb.className="feedback bad"; fb.textContent="De kluis blijft dicht. Drie getallen, drie kaarten, dan rekenen."; inp.classList.remove("shake"); void inp.offsetWidth; inp.classList.add("shake"); }
 }
 function check(i){
@@ -495,6 +496,8 @@ window.addEventListener("resize",()=>goTo(state.page,false));
 
 /* ---------- muziek: een vrolijke jig op doedelzakdrone, gesynthetiseerd ---------- */
 let AC=null, musicOn=true, musicTimer=null, droneNodes=[];
+function unlockAudio(){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume(); const b=AC.createBuffer(1,1,22050), src=AC.createBufferSource(); src.buffer=b; src.connect(AC.destination); src.start(0); }catch(e){} }
+["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev,unlockAudio,{passive:true}));
 function freq(n){ return 440*Math.pow(2,(n-69)/12); }
 function startMusic(){
   if(!musicOn) return;
@@ -520,7 +523,8 @@ function startMusic(){
   play();
 }
 function stopMusic(keepFlag=true){ clearTimeout(musicTimer); droneNodes.forEach(n=>{ try{ n.stop?n.stop():n.disconnect(); }catch(e){} }); droneNodes=[]; }
-function toggleMusic(btn){ musicOn=!musicOn; if(musicOn) startMusic(); else stopMusic(); btn.textContent=musicOn?"Muziek uit":"Muziek aan"; btn.setAttribute("aria-pressed",musicOn); }
+function syncMusicBtn(){ const b=track.querySelector("#music"); if(!b) return; const on=musicOn && AC && AC.state==="running"; if(!on) musicOn=false; b.textContent=on?"Muziek uit":"Muziek aan"; b.setAttribute("aria-pressed",on); }
+function toggleMusic(btn){ musicOn=!musicOn; if(musicOn){ unlockAudio(); startMusic(); } else stopMusic(); btn.textContent=musicOn?"Muziek uit":"Muziek aan"; btn.setAttribute("aria-pressed",musicOn); }
 
 /* ---------- confetti in Schotse kleuren ---------- */
 function confetti(){
@@ -537,6 +541,25 @@ function confetti(){
 }
 
 /* ---------- papegaaiduikers die voorbij waggelen ---------- */
+const NESSIE=`<svg viewBox="0 0 340 170" aria-hidden="true">
+  <path d="M8 150 C 40 150, 50 120, 70 120 C 90 120, 95 95, 115 95 C 135 95, 140 125, 160 125 C 180 125, 185 90, 205 90 C 225 90, 232 128, 252 128 C 266 128, 272 110, 286 100" fill="none" stroke="#2d5b3e" stroke-width="30" stroke-linecap="round"/>
+  <path d="M8 150 C 40 150, 50 120, 70 120 C 90 120, 95 95, 115 95 C 135 95, 140 125, 160 125 C 180 125, 185 90, 205 90 C 225 90, 232 128, 252 128 C 266 128, 272 110, 286 100" fill="none" stroke="#3f7a52" stroke-width="16" stroke-linecap="round" stroke-dasharray="2 22" opacity=".7"/>
+  <path d="M286 100 C 300 80, 306 50, 296 28 C 290 16, 276 14, 268 24 C 262 32, 266 40, 262 46" fill="none" stroke="#2d5b3e" stroke-width="24" stroke-linecap="round"/>
+  <path d="M270 22 C 258 10, 240 12, 236 24 C 234 32, 240 36, 250 36 L 268 36" fill="#2d5b3e"/>
+  <path d="M236 30 l-12 4 12 2z" fill="#1f3f2a"/>
+  <circle cx="258" cy="24" r="4.5" fill="#F5F7FA"/><circle cx="259.5" cy="24.5" r="2.2" fill="#1b1b1f"/>
+  <path d="M250 34 q6 4 12 0" fill="none" stroke="#1b1b1f" stroke-width="1.6" stroke-linecap="round"/>
+  <path d="M300 30 l10 -16 2 18z M290 14 l6 -14 6 14z" fill="#1f3f2a"/>
+  <path d="M0 160 Q 40 150 80 160 T 160 160 T 240 160 T 320 160 L 340 160 L 340 170 L 0 170 Z" fill="#1E3854" opacity=".9"/>
+  <path d="M0 158 Q 40 148 80 158 T 160 158 T 240 158 T 320 158" fill="none" stroke="#4f9b97" stroke-width="2" opacity=".6"/>
+</svg>`;
+let nessieBusy=false;
+function spawnNessie(){
+  if(nessieBusy || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  nessieBusy=true; const d=document.createElement("div"); d.className="nessie"; const dur=20+Math.random()*8;
+  d.style.setProperty("--dur",dur+"s"); d.style.setProperty("--y",(28+Math.random()*30)+"vh"); d.innerHTML=NESSIE;
+  document.body.appendChild(d); setTimeout(()=>{ d.remove(); nessieBusy=false; },dur*1000+500);
+}
 const PUFFIN=`<svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="38" rx="18" ry="20" fill="#1b1b1f"/><ellipse cx="34" cy="42" rx="12" ry="15" fill="#f5f5f2"/><circle cx="34" cy="22" r="13" fill="#1b1b1f"/><circle cx="37" cy="23" r="9" fill="#f5f5f2"/><path d="M44 22 l14 2 -14 6 z" fill="#e8552f"/><path d="M44 24 l9 1.5 -9 3.5z" fill="#f4b23e"/><circle cx="36" cy="20" r="2" fill="#1b1b1f"/><path d="M26 56 l-5 5 h8z M36 56 l-5 5 h8z" fill="#e8552f"/><path d="M14 36 q-10 6 -2 14" fill="none" stroke="#1b1b1f" stroke-width="5" stroke-linecap="round"/></svg>`;
 function spawnCritter(){
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -548,6 +571,7 @@ function spawnCritter(){
 const st=document.createElement("style"); st.textContent="@keyframes walkL{from{transform:translateX(0) scaleX(-1)}to{transform:translateX(calc(-100vw - 180px)) scaleX(-1)}}"; document.head.appendChild(st);
 function scheduleCritter(){ setTimeout(()=>{ spawnCritter(); scheduleCritter(); }, 15000+Math.random()*25000); }
 setTimeout(spawnCritter, 4000); scheduleCritter();
+(function schedNessie(){ setTimeout(()=>{ spawnNessie(); schedNessie(); }, 45000+Math.random()*45000); })();
 
 render();
 </script>
