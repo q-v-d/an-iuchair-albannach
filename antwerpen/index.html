@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#132539">
+<title>Latha ann an Antwerpen</title>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: zelfde kaartenstapel als het spel en de trouwgids. Eén kaart per tijdsbesteding; per kaart kies je één optie; de laatste kaart toont jullie dag met een kaartje. */
+:root{
+  --bg:#132539; --surface:#1E3854; --fg:#F5F7FA; --muted:#B4C3D4;
+  --accent:#A68D5A; --accent-text:#D2BF92; --accent-ink:#14263A;
+  --tint:#294A6F; --line:#3B5C82; --gold:#A68D5A; --ok:#8FC9A0;
+  --font-display:"IM Fell English SC","Iowan Old Style",Georgia,serif;
+  --font-body:"Playfair Display",Georgia,"Times New Roman",serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px;-webkit-font-smoothing:antialiased}
+.app{height:100%;max-width:480px;margin-inline:auto;display:flex;flex-direction:column;gap:12px}
+.track{flex:1 1 0;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;border-radius:28px;scroll-behavior:smooth}
+.track::-webkit-scrollbar{display:none}
+.card{flex:0 0 100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:28px 22px 72px;display:flex;flex-direction:column;gap:16px}
+.card>*{flex-shrink:0}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text);display:flex;align-items:center;gap:8px}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.4rem,12vw,3.4rem);line-height:.98}
+h1 em{font-style:normal;color:var(--accent)}
+h1 .sub{display:block;font-size:.5em;line-height:1.1;margin-top:.25em;color:var(--accent-text)}
+h2{font-size:clamp(1.9rem,9vw,2.5rem);line-height:1.02;color:var(--accent)}
+h3{font-size:1.25rem;line-height:1.15}
+p{margin:0}
+.lead{font-size:17px;color:var(--muted)}
+.muted{color:var(--muted)}
+.icon{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.rings{width:72px;height:44px;color:var(--gold)}
+.facts{display:grid;gap:10px}
+.fact{display:flex;align-items:center;gap:14px;background:var(--tint);border-radius:18px;padding:14px 16px}
+.fact small{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.fact strong{font-size:17px;font-weight:600}
+.swipe{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}
+.swipe .icon{width:18px;height:18px;animation:nudge 2.2s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+.note{display:grid;grid-template-columns:24px 1fr;gap:12px;background:var(--tint);border-radius:18px;padding:16px;font-size:15.5px}
+.note .icon{color:var(--accent-text)}
+.note strong{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-text);margin-bottom:4px}
+.opts{display:grid;gap:12px}
+.opt{display:grid;grid-template-columns:1fr auto;gap:6px 12px;text-align:left;padding:16px;border-radius:22px;border:2px solid var(--line);background:transparent;color:var(--fg);font:inherit;cursor:pointer;transition:border-color .15s,background-color .15s}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--tint)}
+.opt .name{font-weight:700;font-size:17px;line-height:1.3}
+.opt .why{font-size:14.5px;color:var(--muted);grid-column:1/-1}
+.opt .pick{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;color:var(--accent-ink);align-self:start}
+.opt[aria-pressed="true"] .pick{background:var(--accent);border-color:var(--accent)}
+.opt .pick .icon{width:16px;height:16px;stroke-width:2.5;opacity:0}
+.opt[aria-pressed="true"] .pick .icon{opacity:1}
+.tags{display:flex;flex-wrap:wrap;gap:6px;grid-column:1/-1}
+.tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:99px;background:var(--surface);color:var(--accent-text);border:1px solid var(--line)}
+.opt[aria-pressed="true"] .tag{background:var(--accent-ink)}
+.maplink{grid-column:1/-1;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent-text);text-decoration:none;min-height:32px}
+/* dagoverzicht */
+.timeline{list-style:none;margin:8px 0 0;padding:0;position:relative;display:grid;gap:22px}
+.timeline::before{content:"";position:absolute;left:27px;top:28px;bottom:28px;width:2px;background:repeating-linear-gradient(to bottom,var(--line) 0 6px,transparent 6px 12px)}
+.tl-item{position:relative;display:grid;grid-template-columns:56px 1fr;gap:14px;align-items:start}
+.tl-dot{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);position:relative;z-index:1}
+.tl-dot.alt{background:var(--tint);color:var(--accent-text);box-shadow:inset 0 0 0 2px var(--accent)}
+.tl-dot.empty{background:var(--surface);color:var(--line);box-shadow:inset 0 0 0 2px var(--line)}
+.tl-time{font-family:var(--font-display);color:var(--accent);font-size:1.7rem;line-height:1.05;font-variant-numeric:tabular-nums}
+.tl-title{font-weight:600;margin-top:2px}
+.tl-place{color:var(--muted);font-size:14.5px}
+.tl-link{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--accent-text);background:none;border:0;padding:6px 0;cursor:pointer;font-family:inherit;min-height:36px;text-decoration:none}
+.map{border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--tint)}
+.map svg{display:block;width:100%;height:auto}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:12px 18px;border-radius:16px;border:2px solid var(--accent);font:inherit;font-weight:600;font-size:16px;cursor:pointer;width:100%;background:transparent;color:var(--accent-text)}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+/* nav */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.nav-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer}
+.nav-btn:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:1px;align-items:center}
+.dot{width:20px;height:40px;border:0;background:none;padding:0;cursor:pointer;display:grid;place-items:center}
+.dot::after{content:"";width:8px;height:8px;border-radius:99px;background:var(--line);transition:width .2s,background-color .2s}
+.dot.done::after{background:var(--accent-text)}
+.dot[aria-current="true"]::after{width:20px;background:var(--accent)}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.critter{position:fixed;bottom:calc(74px + env(safe-area-inset-bottom,0px));left:-90px;width:60px;height:60px;pointer-events:none;z-index:25;animation:walk var(--dur,14s) linear forwards}
+.critter svg{width:100%;height:100%;animation:waddle .5s ease-in-out infinite alternate;transform-origin:50% 100%}
+@keyframes walk{from{transform:translateX(0)}to{transform:translateX(calc(100vw + 180px))}}
+@keyframes waddle{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.track{scroll-behavior:auto}.critter{display:none}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <defs>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9.5 5.5L16 12l-6.5 6.5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.2a7 7 0 0114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-cup" viewBox="0 0 24 24"><path d="M4 8h12v6a5 5 0 01-5 5H9a5 5 0 01-5-5zM16 10h2.5a2.5 2.5 0 010 5H16M6 3.5v2M10 3.5v2"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 016.5 3H20v15H6.5A2.5 2.5 0 004 20.5zM4 20.5V5.5M20 18v3H6.5"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5 8h14l-1 13H6zM9 8V6a3 3 0 016 0v2"/></symbol>
+  <symbol id="i-fork" viewBox="0 0 24 24"><path d="M6 3v6a3 3 0 003 3v9M9 3v6M17 21V3c-2 1.5-3 4.5-3 8h3"/></symbol>
+  <symbol id="i-hall" viewBox="0 0 24 24"><path d="M3 21h18M5.5 21V10.5M10 21V10.5M14 21V10.5M18.5 21V10.5M3 10.5L12 4l9 6.5z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.4" style="fill:currentColor"/><circle cx="15.5" cy="15.5" r="1.4" style="fill:currentColor"/><circle cx="12" cy="12" r="1.4" style="fill:currentColor"/><circle cx="15.5" cy="8.5" r="1.4" style="fill:currentColor"/><circle cx="8.5" cy="15.5" r="1.4" style="fill:currentColor"/></symbol>
+  <symbol id="i-glass" viewBox="0 0 24 24"><path d="M8 3h8l-.9 6.8a3.1 3.1 0 01-6.2 0L8 3zM12 13v8M8.5 21h7M8.6 7h6.8"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="12" r="4.5"/><path d="M12.5 12H21M18 12v3.5M15 12v2.5"/></symbol>
+ </defs>
+</svg>
+
+<main class="app">
+  <div class="track" id="track" tabindex="0" aria-label="Antwerpen-tour, veeg naar links of rechts"></div>
+  <nav class="nav">
+    <button class="nav-btn" id="prev" aria-label="Vorige"><svg class="icon"><use href="#i-left"/></svg></button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn" id="next" aria-label="Volgende"><svg class="icon"><use href="#i-right"/></svg></button>
+  </nav>
+</main>
+
+<script>
+// ───────── PAS HIER AAN ─────────
+const CONFIG = { bruid:"Yenthe", bruidegom:"Renaat", afzender:"Quinten & Jente", datum:"Nog te prikken" };
+
+// Per blok: tijd, titel, icoon, en 2–4 opties. Elke optie: naam, waarom, tags, lat, lng.
+const BLOCKS = [
+  { time:"10:00", title:"Ontbijt", icon:"i-cup", intro:"Eerst koffie. De stad begint pas als jullie gezeten hebben.", options:[
+    { name:"Tartoer", where:"Korte Koepoortstraat 2", why:"Koffiebar met eigen bakkerij, op twee minuten van de Grote Markt. Croissants die het ontbijt al goedmaken.", tags:["koffie","gebak"], lat:51.2214795, lng:4.4023659 },
+    { name:"Oreno", where:"Oude Koornmarkt 40", why:"Brunchplek vlak bij de Vlaaikensgang. Uitgebreid, rustig, en een goede start voor een lange dag.", tags:["brunch"], lat:51.219772, lng:4.4001879 },
+    { name:"Nelly Coffee", where:"Zilversmidstraat 9", why:"Klein en knus, verscholen achter het stadhuis. Voor wie het liever stil houdt.", tags:["koffie","klein"], lat:51.2217218, lng:4.3992231 },
+  ]},
+  { time:"11:00", title:"Boeken & poëzie", icon:"i-book", intro:"Antwerpen is een boekenstad. Kies waar jullie bladeren.", options:[
+    { name:"Hendrik Conscienceplein & Demian", where:"Hendrik Conscienceplein 16", why:"Het mooiste pleintje van de stad, genoemd naar de man die 'zijn volk leerde lezen'. Demian verkoopt er antiquarische boeken en poëzie; daarnaast de Carolus Borromeuskerk.", tags:["poëzie","antiquariaat","plein"], lat:51.221237, lng:4.404678 },
+    { name:"De Groene Waterman + De Slegte English Bookshop", where:"Wolstraat 7 en 1", why:"Twee boekhandels in één straat: de eigenzinnige Groene Waterman en de Engelstalige Slegte. Voor een Schotse dichter in het Engels.", tags:["boekhandel","Engels"], lat:51.2217219, lng:4.4028093 },
+    { name:"Museum Plantin-Moretus", where:"Vrijdagmarkt 22", why:"De oudste drukkerij ter wereld, UNESCO-erfgoed. Oude persen, bibliotheekzalen en een stille binnentuin. Voor wie van boeken houdt als voorwerp.", tags:["museum","drukkunst"], lat:51.2183, lng:4.3977 },
+  ]},
+  { time:"12:30", title:"Lunch", icon:"i-fork", intro:"Iets lekkers, zonder dat de middag eraan opgaat.", options:[
+    { name:"'t Hofke", where:"Vlaaikensgang 6", why:"Verstopt in de Vlaaikensgang, een middeleeuws steegje. Klassiek en gezellig.", tags:["Belgisch","verborgen"], lat:51.2202185, lng:4.3993124 },
+    { name:"Chicon", where:"Kaasrui 6", why:"Belgische keuken met een knipoog, vlak achter de Grote Markt.", tags:["Belgisch"], lat:51.2210029, lng:4.401969 },
+    { name:"Lloyd Coffee Eatery", where:"Meir 78", why:"Lichte lunch en brunch op de Meir, handig als jullie daarna gaan winkelen.", tags:["licht","brunch"], lat:51.2175668, lng:4.4114024 },
+  ]},
+  { time:"14:00", title:"Winkeltjes", icon:"i-bag", intro:"Slenteren, snuisteren, iets vinden dat jullie niet zochten.", options:[
+    { name:"Kloosterstraat", where:"Kloosterstraat, Sint-Andries", why:"Dé straat voor antiek, vintage en curiosa. Van oude landkaarten tot lampen. Eindigt aan de Schelde.", tags:["antiek","vintage"], lat:51.2155301, lng:4.3946689 },
+    { name:"Purple Petals Bookstore", where:"Wiegstraat 16", why:"Kleine onafhankelijke boekenwinkel met een zachte selectie. Voor nog één bundel.", tags:["boeken"], lat:51.2179609, lng:4.4043633 },
+    { name:"Outpost Gamecenter", where:"Beggaardenstraat 6", why:"Spellenwinkel in de stad: bordspellen, kaartspellen, uitbreidingen. Neem er eentje mee voor vanavond.", tags:["spelletjes"], lat:51.2194737, lng:4.4046446 },
+  ]},
+  { time:"15:30", title:"Monumenten", icon:"i-hall", intro:"Eén groot ding, goed bekeken, is beter dan vijf in het voorbijgaan.", options:[
+    { name:"Onze-Lieve-Vrouwekathedraal", where:"Groenplaats 21", why:"De grootste gotische kerk van de Lage Landen, met vier Rubensen binnen. De toren zie je van overal, binnen is het stiller dan je denkt.", tags:["gotiek","Rubens"], lat:51.2202193, lng:4.4004649 },
+    { name:"Het Steen", where:"Steenplein 1", why:"De oudste burcht van de stad, aan het water. Vanop de wandeling errond zie je de hele Schelde.", tags:["burcht","water"], lat:51.2227238, lng:4.3973637 },
+    { name:"Grote Markt & Brabofontein", where:"Grote Markt", why:"De gildehuizen, het stadhuis en Brabo die de hand van de reus werpt. Hier komt de naam van de stad vandaan, zegt de legende.", tags:["legende","plein"], lat:51.2211808, lng:4.3996965 },
+  ]},
+  { time:"17:00", title:"Uitzicht", icon:"i-eye", intro:"Een plek om even niets te doen en naar de stad te kijken.", options:[
+    { name:"Sint-Annatunnel naar Linkeroever", where:"Sint-Jansvliet, 2000", why:"Met de houten roltrappen uit 1933 onder de Schelde door. Aan de overkant het beroemdste zicht op Antwerpen, met de kathedraal in het midden.", tags:["tunnel","skyline"], lat:51.2212663, lng:4.3900171 },
+    { name:"MAS-dak", where:"Hanzestedenplaats 1", why:"Gratis naar boven via de roltrappen, 360 graden over haven en stad. Bij zonsondergang op zijn best.", tags:["gratis","panorama"], lat:51.2289612, lng:4.4047104 },
+    { name:"Droogdokkenpark", where:"Eilandje", why:"Park op de oude droogdokken, met de getijden van de Schelde aan je voeten. Rustig en weids.", tags:["park","water"], lat:51.2356868, lng:4.4016971 },
+  ]},
+  { time:"18:00", title:"Spelletjes & een glas", icon:"i-dice", intro:"Het Schotse uur. Kies een kroeg, bij voorkeur eentje met een spel op tafel.", options:[
+    { name:"Highlander Cafe", where:"Stadswaag 21", why:"De Schotse kroeg van Antwerpen, op het rustige Stadswaagplein. Whisky op de kaart en een naam die geen uitleg vraagt.", tags:["Schots","whisky"], lat:51.2238843, lng:4.4067678 },
+    { name:"The Playground", where:"Hoofdkerkstraat 7", why:"Bordspelcafé met honderden spellen in de kast. Ze helpen je kiezen; jullie spelen.", tags:["bordspellen","café"], lat:51.2213, lng:4.4036838 },
+    { name:"An Sibhin", where:"Nationalestraat 44", why:"Ierse pub, dus Keltisch genoeg. Live muziek op sommige avonden.", tags:["Iers","muziek"], lat:51.2164947, lng:4.3990434 },
+  ]},
+  { time:"20:00", title:"Diner", icon:"i-moon", intro:"Afsluiten met een goede tafel.", options:[
+    { name:"De Pottekijker", where:"Kaasrui 5", why:"Vlees van de grill, Belgisch en zonder poespas, vlak bij de Grote Markt.", tags:["grill","Belgisch"], lat:51.2211404, lng:4.4019674 },
+    { name:"Elfde Gebod", where:"Torfbrug 10", why:"Eten tussen honderden heiligenbeelden, in de schaduw van de kathedraal. Je vergeet het niet.", tags:["bijzonder","decor"], lat:51.220763, lng:4.401475 },
+    { name:"Zilte (MAS)", where:"Hanzestedenplaats 5", why:"Voor als jullie groots willen uitpakken: sterrenrestaurant boven op het MAS, met het uitzicht erbij. Ruim op voorhand reserveren.", tags:["sterren","uitzicht"], lat:51.2289783, lng:4.4047179 },
+  ]},
+];
+// ────────────────────────────────
+
+const KEY="antwerpen-tour-v1";
+let state = load() || { picks:{}, page:0 };
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+const N = BLOCKS.length + 2;
+const track=document.getElementById("track"), dots=document.getElementById("dots"), prevB=document.getElementById("prev"), nextB=document.getElementById("next");
+const mapsUrl=o=>`https://www.google.com/maps/search/?api=1&query=${o.lat},${o.lng}`;
+
+function coverCard(){
+  return `<section class="card" aria-label="Welkom">
+    <svg class="rings" viewBox="0 0 72 44" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="26" cy="22" r="16"/><circle cx="46" cy="22" r="16"/></svg>
+    <div class="eyebrow">Een dag in Antwerpen · voor twee</div>
+    <h1>Latha ann an <em>Antwerpen</em><span class="sub">Een dag in Antwerpen</span></h1>
+    <p class="lead">Wij stippelden een dag uit, jullie kiezen. Per moment van de dag staan er een paar opties; tik er één aan en de laatste kaart wordt jullie eigen programma, met een kaartje en de route.</p>
+    <div class="facts">
+      <div class="fact"><svg class="icon" style="color:var(--accent-text)"><use href="#i-pin"/></svg><div><small>Voor</small><strong>${CONFIG.bruid} &amp; ${CONFIG.bruidegom}</strong></div></div>
+      <div class="fact"><svg class="icon" style="color:var(--accent-text)"><use href="#i-cal"/></svg><div><small>Wanneer</small><strong>${CONFIG.datum}</strong></div></div>
+      <div class="fact"><svg class="icon" style="color:var(--accent-text)"><use href="#i-key"/></svg><div><small>Van</small><strong>${CONFIG.afzender}</strong></div></div>
+    </div>
+    <div class="note"><svg class="icon"><use href="#i-dice"/></svg><p><strong>Spelregel</strong>Alles ligt op wandelafstand in het centrum. Jullie keuzes blijven bewaard op deze gsm, dus je mag gerust nog van gedacht veranderen.</p></div>
+    <div class="swipe"><span>Veeg door naar het ontbijt</span><svg class="icon"><use href="#i-arrow"/></svg></div>
+  </section>`;
+}
+function blockCard(b,i){
+  const pick=state.picks[i];
+  return `<section class="card" aria-label="${b.title}">
+    <div class="eyebrow"><svg class="icon" style="width:18px;height:18px"><use href="#${b.icon}"/></svg>${b.time} · stap ${i+1} van ${BLOCKS.length}</div>
+    <h2>${b.title}</h2>
+    <p class="lead">${b.intro}</p>
+    <div class="opts">${b.options.map((o,k)=>`
+      <button class="opt" data-b="${i}" data-o="${k}" aria-pressed="${pick===k}">
+        <span class="name">${o.name}</span>
+        <span class="pick"><svg class="icon"><use href="#i-check"/></svg></span>
+        <span class="why">${o.why}</span>
+        <span class="tags">${o.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</span>
+        <a class="maplink" href="${mapsUrl(o)}" target="_blank" rel="noopener"><svg class="icon" style="width:14px;height:14px"><use href="#i-pin"/></svg>${o.where}</a>
+      </button>`).join("")}</div>
+  </section>`;
+}
+function dayCard(){
+  const chosen=BLOCKS.map((b,i)=>({b,o:b.options[state.picks[i]]}));
+  const n=chosen.filter(c=>c.o).length;
+  // minikaart
+  const la0=51.211,la1=51.238,lo0=4.386,lo1=4.422, W=320,H=320;
+  const X=o=>((o.lng-lo0)/(lo1-lo0))*W, Y=o=>H-((o.lat-la0)/(la1-la0))*H;
+  const pts=chosen.filter(c=>c.o).map(c=>c.o);
+  const path=pts.length>1?`<path d="M${pts.map(o=>X(o).toFixed(1)+" "+Y(o).toFixed(1)).join(" L")}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 7"/>`:"";
+  const marks=pts.map((o,k)=>`<g transform="translate(${X(o).toFixed(1)} ${Y(o).toFixed(1)})"><circle r="11" fill="var(--accent)" stroke="var(--surface)" stroke-width="2.5"/><text y="4.5" text-anchor="middle" font-size="12" font-weight="700" fill="var(--accent-ink)" font-family="Playfair Display,Georgia,serif">${k+1}</text></g>`).join("");
+  const map=`<div class="map"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kaartje met jullie stops">
+    <rect width="${W}" height="${H}" fill="var(--tint)"/>
+    <path d="M0 0 C 55 40, 70 120, 50 200 C 40 250, 70 300, 90 ${H} L0 ${H} Z" fill="#1a3350"/>
+    <text x="14" y="${H-14}" font-size="11" fill="var(--muted)" font-family="Playfair Display,Georgia,serif" font-style="italic">Schelde</text>
+    <text x="${W-14}" y="22" text-anchor="end" font-size="11" fill="var(--muted)" font-family="Playfair Display,Georgia,serif">N ↑</text>
+    ${path}${marks}</svg></div>`;
+  return `<section class="card" aria-label="Jullie dag">
+    <div class="eyebrow"><svg class="icon" style="width:18px;height:18px"><use href="#i-cal"/></svg>Jullie dag</div>
+    <h2>${n===BLOCKS.length?"Het programma":"Nog "+(BLOCKS.length-n)+" te kiezen"}</h2>
+    ${map}
+    <ol class="timeline">${chosen.map((c,i)=>`<li class="tl-item">
+      <div class="tl-dot ${c.o?(i%2?'alt':''):'empty'}"><svg class="icon" style="width:26px;height:26px"><use href="#${c.b.icon}"/></svg></div>
+      <div><div class="tl-time">${c.b.time}</div><div class="tl-title">${c.o?c.o.name:c.b.title}</div><div class="tl-place">${c.o?c.o.where:"Nog niets gekozen"}</div>
+      ${c.o?`<a class="tl-link" href="${mapsUrl(c.o)}" target="_blank" rel="noopener">Open in Maps <svg class="icon" style="width:16px;height:16px"><use href="#i-arrow"/></svg></a>`:`<button class="tl-link" data-go="${i+1}">Kies <svg class="icon" style="width:16px;height:16px"><use href="#i-arrow"/></svg></button>`}</div>
+    </li>`).join("")}</ol>
+    <p class="muted" style="font-size:14px">Tot op jullie Antwerpse dag,<br>${CONFIG.afzender}</p>
+    <button class="btn" id="reset">Alles opnieuw kiezen</button>
+  </section>`;
+}
+function render(){
+  track.innerHTML = coverCard() + BLOCKS.map(blockCard).join("") + dayCard();
+  dots.innerHTML = Array.from({length:N},(_,p)=>`<button class="dot ${p>0&&p<N-1&&state.picks[p-1]!=null?'done':''}" data-page="${p}" aria-label="Kaart ${p+1}" ${p===state.page?'aria-current="true"':''}></button>`).join("");
+  track.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",e=>{ if(e.target.closest("a")) return; const i=+b.dataset.b,k=+b.dataset.o; state.picks[i]=state.picks[i]===k?null:k; save(); render(); }));
+  track.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>goTo(+b.dataset.go)));
+  track.querySelector("#reset")?.addEventListener("click",()=>{ state={picks:{},page:0}; save(); render(); });
+  dots.querySelectorAll(".dot").forEach(d=>d.addEventListener("click",()=>goTo(+d.dataset.page)));
+  goTo(state.page,false);
+}
+function goTo(p,smooth=true){ p=Math.max(0,Math.min(N-1,p)); state.page=p; save(); track.scrollTo({left:p*track.clientWidth,behavior:smooth?"smooth":"auto"}); prevB.disabled=p===0; nextB.disabled=p===N-1; dots.querySelectorAll(".dot").forEach(d=>d.setAttribute("aria-current",+d.dataset.page===p?"true":"false")); }
+prevB.addEventListener("click",()=>goTo(state.page-1)); nextB.addEventListener("click",()=>goTo(state.page+1));
+let t; track.addEventListener("scroll",()=>{ clearTimeout(t); t=setTimeout(()=>{ const p=Math.round(track.scrollLeft/track.clientWidth); if(p!==state.page){ state.page=p; save(); prevB.disabled=p===0; nextB.disabled=p===N-1; dots.querySelectorAll(".dot").forEach(d=>d.setAttribute("aria-current",+d.dataset.page===p?"true":"false")); } },80); });
+window.addEventListener("resize",()=>goTo(state.page,false));
+
+const PUFFIN=`<svg viewBox="0 0 64 64" aria-hidden="true"><ellipse cx="32" cy="38" rx="18" ry="20" fill="#1b1b1f"/><ellipse cx="34" cy="42" rx="12" ry="15" fill="#f5f5f2"/><circle cx="34" cy="22" r="13" fill="#1b1b1f"/><circle cx="37" cy="23" r="9" fill="#f5f5f2"/><path d="M44 22 l14 2 -14 6 z" fill="#e8552f"/><path d="M44 24 l9 1.5 -9 3.5z" fill="#f4b23e"/><circle cx="36" cy="20" r="2" fill="#1b1b1f"/><path d="M26 56 l-5 5 h8z M36 56 l-5 5 h8z" fill="#e8552f"/><path d="M14 36 q-10 6 -2 14" fill="none" stroke="#1b1b1f" stroke-width="5" stroke-linecap="round"/></svg>`;
+function spawnCritter(){ if(matchMedia("(prefers-reduced-motion: reduce)").matches) return; const d=document.createElement("div"); d.className="critter"; const dur=12+Math.random()*8; d.style.setProperty("--dur",dur+"s"); d.innerHTML=PUFFIN; document.body.appendChild(d); setTimeout(()=>d.remove(),dur*1000+500); }
+(function sched(){ setTimeout(()=>{ spawnCritter(); sched(); },20000+Math.random()*25000); })(); setTimeout(spawnCritter,5000);
+render();
+</script>
+
+</body>
+</html>

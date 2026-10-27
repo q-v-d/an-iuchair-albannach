@@ -353,6 +353,7 @@ function coverCard(){
     </div>
     <div class="swipe"><span>Kies een rol en veeg door</span><svg class="icon"><use href="#i-arrow"/></svg></div>
     <p class="muted" style="font-size:13px"><em>Fàilte gu Alba</em> is Gaelic voor 'welkom in Schotland'.</p>
+    ${state.start?`<button class="btn btn-secondary" id="reset-cover">Spel resetten en opnieuw beginnen</button>`:""}
   </section>`;
 }
 
@@ -473,6 +474,7 @@ function bind(){
   track.querySelector("#ans-k")?.addEventListener("keydown",e=>{ if(e.key==="Enter") checkK(); });
   track.querySelector("#hint-k")?.addEventListener("click",()=>{ state.hints.k=true; save(); render(); });
   track.querySelector("#music")?.addEventListener("click",e=>toggleMusic(e.currentTarget));
+  track.querySelector("#reset-cover")?.addEventListener("click",()=>{ stopMusic(); state={role:null,solved:[],start:null,hints:{},page:0,kluis:false}; save(); render(); });
   track.querySelector("#reset")?.addEventListener("click",()=>{ stopMusic(); state={role:null,solved:[],start:null,hints:{},page:0,kluis:false}; save(); render(); });
   dots.querySelectorAll(".dot").forEach(d=>d.addEventListener("click",()=>goTo(+d.dataset.page)));
 }
