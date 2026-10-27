@@ -143,6 +143,9 @@ p{margin:0}
 @keyframes waveslide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes swim{from{transform:translateX(-110%)}to{transform:translateX(calc(100vw + 20px))}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.poem{display:grid;gap:10px;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);padding:18px 4px}
+.poem h3{color:var(--accent);font-size:1.7rem}
+.verse{white-space:pre-line;font-style:italic;font-size:16.5px;line-height:1.55}
 /* nav */
 .nav{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .nav-btn{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer}
@@ -446,6 +449,30 @@ function finalCard(){
     <div class="tokens" style="justify-content:center">${STATIONS.map(s=>`<span class="token got">${s.token}</span>`).join("")}</div>
     <p class="muted" style="font-size:14px;text-align:center">Welkom · water · familie · gezondheid · leven · liefde. Genoeg Gaelic voor een hele huwelijksreis.</p>
     <div class="note"><svg class="icon"><use href="#i-key"/></svg><p><strong>Voor ${CONFIG.bruid} &amp; ${CONFIG.bruidegom}</strong><span class="letter">${CONFIG.slotbrief}</span><br><span class="muted">— ${CONFIG.afzender}</span></p></div>
+    <div class="poem">
+      <div class="eyebrow">Een Schots liefdesgedicht</div>
+      <h3>A Red, Red Rose</h3>
+      <p class="verse">O my Luve is like a red, red rose
+  That's newly sprung in June;
+O my Luve is like the melody
+  That's sweetly played in tune.
+
+So fair art thou, my bonnie lass,
+  So deep in luve am I;
+And I will luve thee still, my dear,
+  Till a' the seas gang dry.
+
+Till a' the seas gang dry, my dear,
+  And the rocks melt wi' the sun;
+I will luve thee still, my dear,
+  While the sands o' life shall run.
+
+And fare thee weel, my only luve!
+  And fare thee weel awhile!
+And I will come again, my luve,
+  Though it were ten thousand mile.</p>
+      <p class="muted" style="font-size:13.5px">Robert Burns, 1794. De nationale dichter van Schotland, in het Schots: <em>luve</em> is liefde, <em>bonnie</em> is mooi, <em>gang dry</em> is droogvallen, <em>fare thee weel</em> is vaarwel.</p>
+    </div>
     <button class="btn btn-secondary" id="reset">Opnieuw spelen</button>
   </section>`;
 }
