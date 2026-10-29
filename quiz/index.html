@@ -49,9 +49,9 @@ p{margin:0}
 .q{display:grid;gap:10px}
 .q h3{margin:0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;justify-content:space-between}
 .q h3 .pt{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts{display:grid;grid-template-columns:1fr;gap:8px}
 .opts.years{grid-template-columns:repeat(4,1fr)}
-.opt{min-height:50px;padding:10px 12px;border-radius:14px;border:2px solid var(--line);background:transparent;color:var(--fg);font:inherit;font-weight:600;font-size:15px;cursor:pointer;line-height:1.25;overflow-wrap:anywhere;transition:background-color .15s,border-color .15s}
+.opt{min-height:50px;padding:10px 14px;text-align:left;border-radius:14px;border:2px solid var(--line);background:transparent;color:var(--fg);font:inherit;font-weight:600;font-size:15px;cursor:pointer;line-height:1.25;overflow-wrap:anywhere;transition:background-color .15s,border-color .15s}
 .opts.years .opt{font-family:var(--font-display);font-size:20px;font-weight:400;font-variant-numeric:tabular-nums}
 .opt:hover:not(:disabled){border-color:var(--accent)}
 .opt:disabled{cursor:default}
@@ -82,7 +82,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 <main class="app" id="app"></main>
 <script src="vragen.js"></script>
 <script>
-const KEY="cuimhne-quiz-v2";
+const KEY="cuimhne-quiz-v3";
 let st=load()||{i:-1,ans:{}};
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
@@ -91,8 +91,9 @@ const app=document.getElementById("app");
 // vaste "toevallige" volgorde per foto, zodat de keuzes niet verschuiven
 function rng(seed){ return ()=>{ seed=(seed*1664525+1013904223)%4294967296; return seed/4294967296; }; }
 function shuffle(a,r){ a=a.slice(); for(let k=a.length-1;k>0;k--){ const j=Math.floor(r()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
-const allPlaces=[...new Set([...FOTOS.map(f=>f.waar).filter(Boolean),...QUIZ.afleiders])];
-function placeOpts(n){ const f=FOTOS[n]; if(!f.waar) return []; const r=rng(n*97+13); const others=shuffle(allPlaces.filter(p=>p!==f.waar),r).slice(0,3); return shuffle([f.waar,...others],r); }
+function placeOpts(n){ const f=FOTOS[n]; if(!f.waar) return []; const r=rng(n*97+13);
+  const fout=(f.opties&&f.opties.length?f.opties:[...new Set(FOTOS.map(x=>x.waar).filter(w=>w&&w!==f.waar))]).slice(0,3);
+  return shuffle([f.waar,...fout],r); }
 
 function points(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return f.waar&&a.w===f.waar?1:0; }
 function maxPoints(){ return FOTOS.reduce((s,f)=>s+(f.waar?1:0),0); }
