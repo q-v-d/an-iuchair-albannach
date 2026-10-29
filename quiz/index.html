@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#132539">
+<title>Cuimhne · De fotoquiz</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+/* Zelfde huisstijl als het spel: nachtblauw, goud, één kaart per scherm. */
+:root{
+  --bg:#132539; --surface:#1E3854; --fg:#F5F7FA; --muted:#B4C3D4;
+  --accent:#A68D5A; --accent-text:#D2BF92; --accent-ink:#14263A;
+  --tint:#294A6F; --line:#3B5C82; --ok:#8FC9A0; --ok-bg:#2b5a46; --bad:#E39A8C; --bad-bg:#5a2f33;
+  --font-display:"IM Fell English SC","Iowan Old Style",Georgia,serif;
+  --font-body:"Playfair Display",Georgia,"Times New Roman",serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px;-webkit-font-smoothing:antialiased}
+img{max-width:100%}
+[hidden]{display:none!important}
+.app{max-width:520px;margin:0 auto;display:grid;gap:12px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 4px 0}
+.bar .count{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-text);font-weight:600;font-variant-numeric:tabular-nums}
+.score{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-weight:700;font-variant-numeric:tabular-nums}
+.score b{font-family:var(--font-display);font-size:20px;color:var(--accent);font-weight:400}
+.progress{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.progress span{display:block;height:100%;background:var(--accent);transition:width .3s}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:22px 20px 26px;display:grid;gap:16px;min-width:0}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text)}
+h1,h2{font-family:var(--font-display);font-weight:400;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.6rem,13vw,3.6rem);line-height:.98}
+h1 em{font-style:normal;color:var(--accent)}
+h1 .sub{display:block;font-size:.5em;margin-top:.25em;color:var(--accent-text)}
+h2{font-size:1.5rem;color:var(--accent);line-height:1.1}
+p{margin:0}
+.lead{color:var(--muted);font-size:17px}
+.rings{width:72px;height:44px;color:var(--accent)}
+.facts{display:grid;gap:10px}
+.fact{background:var(--tint);border-radius:18px;padding:14px 16px}
+.fact small{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.fact strong{font-size:17px}
+.photo{margin:0;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:#0d1b2a;display:grid;place-items:center}
+.photo img{display:block;width:100%;max-height:52vh;object-fit:contain}
+.q{display:grid;gap:10px}
+.q h3{margin:0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.q h3 .pt{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts.years{grid-template-columns:repeat(4,1fr)}
+.opt{min-height:50px;padding:10px 12px;border-radius:14px;border:2px solid var(--line);background:transparent;color:var(--fg);font:inherit;font-weight:600;font-size:15px;cursor:pointer;line-height:1.25;overflow-wrap:anywhere;transition:background-color .15s,border-color .15s}
+.opts.years .opt{font-family:var(--font-display);font-size:20px;font-weight:400;font-variant-numeric:tabular-nums}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--ok-bg);border-color:var(--ok);color:#fff}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad);color:#fff}
+.opt.dim{opacity:.45}
+.todo{font-size:13px;color:var(--accent-ink);background:var(--accent-text);border-radius:12px;padding:10px 12px;font-weight:600}
+.note{display:grid;gap:4px;background:var(--tint);border-radius:18px;padding:14px 16px;font-size:15.5px}
+.note strong{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-text)}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:12px 18px;border-radius:16px;border:2px solid var(--accent);font:inherit;font-weight:700;font-size:17px;cursor:pointer;width:100%;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--accent-text)}
+.row{display:flex;gap:10px}
+.row .btn{flex:1}
+.big{font-family:var(--font-display);font-size:clamp(3.4rem,18vw,5rem);line-height:1;color:var(--accent);text-align:center;font-variant-numeric:tabular-nums}
+.big small{font-size:.4em;color:var(--muted)}
+.recap{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px}
+.recap div{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1;border:2px solid var(--line);max-width:100%}
+.recap img{width:100%;height:100%;object-fit:cover;display:block}
+.recap span{position:absolute;right:4px;bottom:4px;background:var(--accent-ink);color:var(--accent-text);font-size:12px;font-weight:700;border-radius:99px;padding:1px 7px}
+.recap div.full{border-color:var(--ok)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:30}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<canvas id="confetti" hidden></canvas>
+<main class="app" id="app"></main>
+<script src="vragen.js"></script>
+<script>
+const KEY="cuimhne-quiz-v1";
+let st=load()||{i:-1,ans:{}};
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+const app=document.getElementById("app");
+
+// vaste "toevallige" volgorde per foto, zodat de keuzes niet verschuiven
+function rng(seed){ return ()=>{ seed=(seed*1664525+1013904223)%4294967296; return seed/4294967296; }; }
+function shuffle(a,r){ a=a.slice(); for(let k=a.length-1;k>0;k--){ const j=Math.floor(r()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
+const allPlaces=[...new Set([...FOTOS.map(f=>f.waar).filter(Boolean),...QUIZ.afleiders])];
+function placeOpts(n){ const f=FOTOS[n]; if(!f.waar) return []; const r=rng(n*97+13); const others=shuffle(allPlaces.filter(p=>p!==f.waar),r).slice(0,3); return shuffle([f.waar,...others],r); }
+function yearOpts(n){ const f=FOTOS[n]; if(!f.jaar) return []; const r=rng(n*31+7); const max=new Date().getFullYear();
+  const cand=[-3,-2,-1,1,2,3].map(d=>f.jaar+d).filter(y=>y<=max); return shuffle(cand,r).slice(0,3).concat(f.jaar).sort((a,b)=>a-b); }
+
+function points(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return (f.waar&&a.w===f.waar?1:0)+(f.jaar&&a.j===f.jaar?1:0); }
+function maxPoints(){ return FOTOS.reduce((s,f)=>s+(f.waar?1:0)+(f.jaar?1:0),0); }
+function score(){ return FOTOS.reduce((s,_,n)=>s+points(n),0); }
+function done(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return (!f.waar||a.w!=null)&&(!f.jaar||a.j!=null); }
+
+function bar(){
+  const n=st.i, pct=n<0?0:Math.round((Math.min(n,FOTOS.length))/FOTOS.length*100);
+  return `<div class="bar"><span class="count">${n>=0&&n<FOTOS.length?`Foto ${n+1} van ${FOTOS.length}`:"Cuimhne"}</span><span class="score"><b>${score()}</b> punten</span></div>
+  <div class="progress"><span style="width:${pct}%"></span></div>`;
+}
+
+function render(){
+  if(st.i<0) return cover();
+  if(st.i>=FOTOS.length) return end();
+  const n=st.i, f=FOTOS[n], a=st.ans[n]||{};
+  const btn=(val,picked,correct,kind)=>{ const answered=picked!=null; let c="opt";
+    if(answered){ if(val===correct) c+=" right"; else if(val===picked) c+=" wrong"; else c+=" dim"; }
+    return `<button class="${c}" data-k="${kind}" data-v="${val}" ${answered?"disabled":""}>${val}</button>`; };
+  const q1 = f.waar ? `<div class="opts">${placeOpts(n).map(p=>btn(p,a.w,f.waar,"w")).join("")}</div>` : `<div class="todo">Plaats nog in te vullen in vragen.js</div>`;
+  const q2 = f.jaar ? `<div class="opts years">${yearOpts(n).map(y=>btn(y,a.j,f.jaar,"j")).join("")}</div>` : `<div class="todo">Jaar nog in te vullen in vragen.js</div>`;
+  const fin=done(n);
+  app.innerHTML=bar()+`<section class="card">
+    <figure class="photo"><img src="img/${f.img}" alt="Foto ${n+1}"></figure>
+    <div class="q"><h3>Waar is deze foto genomen?<span class="pt">1 punt</span></h3>${q1}</div>
+    <div class="q"><h3>In welk jaar?<span class="pt">1 punt</span></h3>${q2}</div>
+    ${fin?`<div class="note"><strong>${points(n)===2?"Allebei juist!":points(n)===1?"Half juist":"Helaas"}</strong>${f.weetje||""}</div>`:""}
+    <div class="row">
+      ${n>0?`<button class="btn ghost" id="prev">← Vorige</button>`:""}
+      <button class="btn" id="next" ${fin?"":"disabled style='opacity:.4'"}>${n+1<FOTOS.length?"Volgende foto →":"Naar de uitslag"}</button>
+    </div>
+  </section>`;
+  app.querySelectorAll(".opt:not(:disabled)").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.k; st.ans[n]=st.ans[n]||{}; st.ans[n][k]= k==="j"? +b.dataset.v : b.dataset.v; save(); render(); }));
+  app.querySelector("#prev")?.addEventListener("click",()=>go(n-1));
+  app.querySelector("#next")?.addEventListener("click",()=>{ if(done(n)) go(n+1); });
+}
+function go(i){ st.i=i; save(); render(); window.scrollTo(0,0); if(i>=FOTOS.length) confetti(); }
+
+function cover(){
+  app.innerHTML=`<section class="card">
+    <svg class="rings" viewBox="0 0 72 44" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="26" cy="22" r="16"/><circle cx="46" cy="22" r="16"/></svg>
+    <div class="eyebrow">Cuimhne is Gaelic voor herinnering</div>
+    <h1>${QUIZ.titel}<span class="sub">${QUIZ.ondertitel}</span></h1>
+    <p class="lead">${FOTOS.length} foto's uit de voorbije jaren. Bij elke foto twee vragen: waar was dit, en in welk jaar? Elk juist antwoord is een punt waard.</p>
+    <div class="facts">
+      <div class="fact"><small>Voor</small><strong>${QUIZ.voor}</strong></div>
+      <div class="fact"><small>Van</small><strong>${QUIZ.van}</strong></div>
+    </div>
+    <button class="btn" id="start">${Object.keys(st.ans).length?"Verder spelen":"Start de quiz"}</button>
+    ${Object.keys(st.ans).length?`<button class="btn ghost" id="reset">Opnieuw beginnen</button>`:""}
+  </section>`;
+  app.querySelector("#start").addEventListener("click",()=>{ let i=0; while(i<FOTOS.length&&done(i)&&st.ans[i]) i++; go(Math.min(i,FOTOS.length-1)); });
+  app.querySelector("#reset")?.addEventListener("click",()=>{ st={i:-1,ans:{}}; save(); render(); });
+}
+
+function end(){
+  const s=score(), m=maxPoints(), pct=m?s/m:0;
+  const msg= pct>=.9?"Jullie geheugen is beter dan een fotoalbum.": pct>=.7?"Sterk! De meeste momenten zitten nog vers.": pct>=.5?"Niet slecht. Tijd om samen de foto's nog eens door te bladeren.":"Hmm. Zijn jullie er wel zeker van dat jullie erbij waren?";
+  app.innerHTML=bar()+`<section class="card">
+    <div class="eyebrow" style="text-align:center">De uitslag</div>
+    <div class="big">${s}<small> / ${m}</small></div>
+    <h2 style="text-align:center">${msg}</h2>
+    <div class="recap">${FOTOS.map((f,n)=>{ const p=points(n), mx=(f.waar?1:0)+(f.jaar?1:0); return `<div class="${p===mx&&mx?'full':''}"><img src="img/${f.img}" alt=""><span>${p}/${mx}</span></div>`; }).join("")}</div>
+    <p class="muted" style="text-align:center;color:var(--muted)">Met liefde verzameld door ${QUIZ.van}.</p>
+    <div class="row"><button class="btn ghost" id="back">← Terug</button><button class="btn" id="again">Opnieuw spelen</button></div>
+  </section>`;
+  app.querySelector("#back").addEventListener("click",()=>go(FOTOS.length-1));
+  app.querySelector("#again").addEventListener("click",()=>{ st={i:-1,ans:{}}; save(); render(); });
+}
+
+function confetti(){
+  const c=document.getElementById("confetti"), ctx=c.getContext("2d"); c.hidden=false; c.width=innerWidth; c.height=innerHeight;
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){ c.hidden=true; return; }
+  const cols=["#005EB8","#FFFFFF","#A68D5A","#9b2c2c","#2d5b3e","#D2BF92"];
+  const ps=Array.from({length:150},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.6,w:6+Math.random()*6,h:8+Math.random()*8,c:cols[Math.random()*6|0],vy:2+Math.random()*3,vx:(Math.random()-.5)*2,r:Math.random()*6.28,vr:(Math.random()-.5)*.25}));
+  const t0=performance.now();
+  (function f(now){ ctx.clearRect(0,0,c.width,c.height);
+    ps.forEach(p=>{ p.y+=p.vy; p.x+=p.vx; p.r+=p.vr; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); });
+    if(now-t0<6000) requestAnimationFrame(f); else c.hidden=true; })(t0);
+}
+render();
+</script>
+</body>
+</html>
