@@ -81,7 +81,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 <main class="app" id="app"></main>
 <script src="vragen.js"></script>
 <script>
-const KEY="cuimhne-quiz-v4";
+const KEY="cuimhne-quiz-v5";
 let st=load()||{i:-1,ans:{}};
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
@@ -134,7 +134,9 @@ function render(){
   app.querySelector("#prev")?.addEventListener("click",()=>go(n-1));
   app.querySelector("#next")?.addEventListener("click",()=>{ if(done(n)) go(n+1); });
 }
-function go(i){ st.i=i; save(); render(); window.scrollTo(0,0); if(i>=FOTOS.length) confetti(); }
+function go(i){ const wasEnd=st.i>=FOTOS.length; st.i=i; save(); render(); window.scrollTo(0,0);
+  if(i>=FOTOS.length){ confetti(); musicOn=true; unlockAudio(); (AC&&AC.resume?AC.resume():Promise.resolve()).then(startMusic,startMusic); setTimeout(syncMusicBtn,800); }
+  else if(wasEnd) stopMusic(); }
 
 function cover(){
   app.innerHTML=`<section class="card">
@@ -162,11 +164,46 @@ function end(){
     <h2 style="text-align:center">${msg}</h2>
     <div class="recap">${FOTOS.map((f,n)=>{ const p=points(n); return `<div class="${p?'full':''}"><img src="img/${f.img}" alt="">${f.waar?`<span>${p?'✓':'✗'}</span>`:''}</div>`; }).join("")}</div>
     <p class="muted" style="text-align:center;color:var(--muted)">Met liefde verzameld door ${QUIZ.van}.</p>
+    <button class="btn ghost" id="music" aria-pressed="true">Muziek uit</button>
     <div class="row"><button class="btn ghost" id="back">← Terug</button><button class="btn" id="again">Opnieuw spelen</button></div>
   </section>`;
   app.querySelector("#back").addEventListener("click",()=>go(FOTOS.length-1));
-  app.querySelector("#again").addEventListener("click",()=>{ st={i:-1,ans:{}}; save(); render(); });
+  app.querySelector("#again").addEventListener("click",()=>{ stopMusic(); st={i:-1,ans:{}}; save(); render(); });
+  app.querySelector("#music").addEventListener("click",e=>toggleMusic(e.currentTarget));
 }
+
+/* ---------- muziek: een vrolijke jig op doedelzakdrone, gesynthetiseerd ---------- */
+let AC=null, musicOn=true, musicTimer=null, droneNodes=[];
+function unlockAudio(){ try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume(); const b=AC.createBuffer(1,1,22050), src=AC.createBufferSource(); src.buffer=b; src.connect(AC.destination); src.start(0); }catch(e){} }
+["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev,unlockAudio,{passive:true}));
+function freq(n){ return 440*Math.pow(2,(n-69)/12); }
+function startMusic(){
+  if(!musicOn) return;
+  try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return; }
+  if(AC.state==="suspended") AC.resume();
+  stopMusic(false);
+  const master=AC.createGain(); master.gain.value=0.16; master.connect(AC.destination);
+  // drone: A en E (bourdon van een doedelzak)
+  [57,64].forEach((n,k)=>{ const o=AC.createOscillator(), g=AC.createGain(), f=AC.createBiquadFilter(); o.type="sawtooth"; o.frequency.value=freq(n); f.type="lowpass"; f.frequency.value=900; g.gain.value=k?0.08:0.14; o.connect(f).connect(g).connect(master); o.start(); droneNodes.push(o,g,master); });
+  // jig in 6/8, A-mixolydisch (eigen melodie). [midi, duur in achtsten]
+  const A=[[69,1],[71,1],[73,1],[76,1],[73,1],[71,1],[69,1],[71,1],[73,1],[71,2],[69,1],
+           [69,1],[71,1],[73,1],[76,1],[78,1],[76,1],[73,2],[71,1],[69,3],
+           [76,1],[78,1],[80,1],[81,1],[80,1],[78,1],[76,1],[73,1],[76,1],[78,2],[76,1],
+           [73,1],[76,1],[73,1],[71,1],[73,1],[71,1],[69,2],[71,1],[69,3]];
+  const e=0.19; let t=AC.currentTime+0.1; const notes=[];
+  const play=()=>{
+    let tt=AC.currentTime+0.05;
+    A.forEach(([n,d])=>{ const o=AC.createOscillator(), g=AC.createGain(), f=AC.createBiquadFilter(); o.type="square"; o.frequency.value=freq(n); f.type="lowpass"; f.frequency.value=2200;
+      g.gain.setValueAtTime(0.0001,tt); g.gain.exponentialRampToValueAtTime(0.5,tt+0.015); g.gain.setValueAtTime(0.5,tt+d*e-0.04); g.gain.exponentialRampToValueAtTime(0.0001,tt+d*e);
+      o.connect(f).connect(g).connect(master); o.start(tt); o.stop(tt+d*e+0.02); tt+=d*e; });
+    musicTimer=setTimeout(play, (tt-AC.currentTime)*1000);
+  };
+  play();
+}
+function stopMusic(keepFlag=true){ clearTimeout(musicTimer); droneNodes.forEach(n=>{ try{ n.stop?n.stop():n.disconnect(); }catch(e){} }); droneNodes=[]; }
+function syncMusicBtn(){ const b=app.querySelector("#music"); if(!b) return; const on=musicOn && AC && AC.state==="running"; if(!on) musicOn=false; b.textContent=on?"Muziek uit":"Muziek aan"; b.setAttribute("aria-pressed",on); }
+function toggleMusic(btn){ musicOn=!musicOn; if(musicOn){ unlockAudio(); startMusic(); } else stopMusic(); btn.textContent=musicOn?"Muziek uit":"Muziek aan"; btn.setAttribute("aria-pressed",musicOn); }
+
 
 function confetti(){
   const c=document.getElementById("confetti"), ctx=c.getContext("2d"); c.hidden=false; c.width=innerWidth; c.height=innerHeight;
