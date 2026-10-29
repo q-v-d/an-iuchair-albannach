@@ -49,15 +49,14 @@ p{margin:0}
 .q{display:grid;gap:10px}
 .q h3{margin:0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;justify-content:space-between}
 .q h3 .pt{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.opts{display:grid;grid-template-columns:1fr;gap:8px}
-.opts.years{grid-template-columns:repeat(4,1fr)}
-.opt{min-height:50px;padding:10px 14px;text-align:left;border-radius:14px;border:2px solid var(--line);background:transparent;color:var(--fg);font:inherit;font-weight:600;font-size:15px;cursor:pointer;line-height:1.25;overflow-wrap:anywhere;transition:background-color .15s,border-color .15s}
-.opts.years .opt{font-family:var(--font-display);font-size:20px;font-weight:400;font-variant-numeric:tabular-nums}
-.opt:hover:not(:disabled){border-color:var(--accent)}
-.opt:disabled{cursor:default}
-.opt.right{background:var(--ok-bg);border-color:var(--ok);color:#fff}
-.opt.wrong{background:var(--bad-bg);border-color:var(--bad);color:#fff}
-.opt.dim{opacity:.45}
+.ans{display:grid;gap:8px}
+.ans input{width:100%;font:inherit;font-size:18px;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--fg)}
+.ans input:focus{outline:none;border-color:var(--accent)}
+.given{border-radius:14px;padding:12px 16px;border:2px solid var(--line);font-weight:600;font-size:17px;overflow-wrap:anywhere}
+.given small{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;opacity:.8}
+.given.right{background:var(--ok-bg);border-color:var(--ok)}
+.given.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.tl{justify-self:start;background:none;border:0;padding:6px 0 0;color:var(--accent-text);font:inherit;font-weight:600;font-size:14px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .todo{font-size:13px;color:var(--accent-ink);background:var(--accent-text);border-radius:12px;padding:10px 12px;font-weight:600}
 .note{display:grid;gap:4px;background:var(--tint);border-radius:18px;padding:14px 16px;font-size:15.5px}
 .note strong{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-text)}
@@ -82,23 +81,27 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 <main class="app" id="app"></main>
 <script src="vragen.js"></script>
 <script>
-const KEY="cuimhne-quiz-v3";
+const KEY="cuimhne-quiz-v4";
 let st=load()||{i:-1,ans:{}};
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
 const app=document.getElementById("app");
 
-// vaste "toevallige" volgorde per foto, zodat de keuzes niet verschuiven
-function rng(seed){ return ()=>{ seed=(seed*1664525+1013904223)%4294967296; return seed/4294967296; }; }
-function shuffle(a,r){ a=a.slice(); for(let k=a.length-1;k>0;k--){ const j=Math.floor(r()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
-function placeOpts(n){ const f=FOTOS[n]; if(!f.waar) return []; const r=rng(n*97+13);
-  const fout=(f.opties&&f.opties.length?f.opties:[...new Set(FOTOS.map(x=>x.waar).filter(w=>w&&w!==f.waar))]).slice(0,3);
-  return shuffle([f.waar,...fout],r); }
-
-function points(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return f.waar&&a.w===f.waar?1:0; }
+// vrij antwoord: juist als het een sleutelwoord bevat of er sterk op lijkt
+function norm(t){ return (t||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim(); }
+function lev(a,b){ const d=Array.from({length:a.length+1},(_,i)=>[i]); for(let j=1;j<=b.length;j++) d[0][j]=j;
+  for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[a.length][b.length]; }
+function isRight(n,txt){
+  if(!FOTOS[n].waar) return false; const t=norm(txt); if(!t) return false; const words=t.split(" ");
+  return (FOTOS[n].ok||[norm(FOTOS[n].waar)]).some(k=>{ k=norm(k); if(t.includes(k)) return true;
+    const kw=k.split(" ").length, tol=Math.max(1,Math.floor(k.length/4));
+    for(let i=0;i+kw<=words.length;i++){ if(lev(words.slice(i,i+kw).join(" "),k)<=tol) return true; }
+    return k.length>=5 && lev(t,k)<=tol; });
+}
+function points(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return f.waar&&a.ok?1:0; }
 function maxPoints(){ return FOTOS.reduce((s,f)=>s+(f.waar?1:0),0); }
 function score(){ return FOTOS.reduce((s,_,n)=>s+points(n),0); }
-function done(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return !f.waar||a.w!=null; }
+function done(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return !f.waar||a.txt!=null; }
 
 function bar(){
   const n=st.i, pct=n<0?0:Math.round((Math.min(n,FOTOS.length))/FOTOS.length*100);
@@ -110,22 +113,24 @@ function render(){
   if(st.i<0) return cover();
   if(st.i>=FOTOS.length) return end();
   const n=st.i, f=FOTOS[n], a=st.ans[n]||{};
-  const btn=(val,picked,correct,kind)=>{ const answered=picked!=null; let c="opt";
-    if(answered){ if(val===correct) c+=" right"; else if(val===picked) c+=" wrong"; else c+=" dim"; }
-    return `<button class="${c}" data-k="${kind}" data-v="${val}" ${answered?"disabled":""}>${val}</button>`; };
-  const q1 = f.waar ? `<div class="opts">${placeOpts(n).map(p=>btn(p,a.w,f.waar,"w")).join("")}</div>` : `<div class="todo">Plaats nog in te vullen in vragen.js</div>`;
+  const q1 = !f.waar ? `<div class="todo">Plaats nog in te vullen in vragen.js</div>`
+    : a.txt==null ? `<form class="ans" id="f"><input id="txt" autocomplete="off" placeholder="Typ jullie antwoord" aria-label="Waar is deze foto genomen?"><button class="btn" type="submit">Controleer</button></form>`
+    : `<div class="given ${a.ok?'right':'wrong'}"><small>Jullie antwoord</small>${a.txt.replace(/</g,"&lt;")}</div>`;
   const fin=done(n);
   app.innerHTML=bar()+`<section class="card">
     <figure class="photo"><img src="img/${f.img}" alt="Foto ${n+1}"></figure>
     <div class="q"><h3>Waar is deze foto genomen?<span class="pt">1 punt</span></h3>${q1}</div>
-    ${fin?`<div class="note"><strong>${points(n)?"Juist!":"Helaas, het was "+f.waar}</strong>${f.weetje||""}</div>`:""}
+    ${fin?`<div class="note"><strong>${points(n)?"Juist! ":"Helaas. "}Het was ${f.waar}.</strong>${f.weetje||""}${!a.ok&&f.waar?`<button class="tl" id="override">Toch juist? Reken goed</button>`:""}</div>`:""}
     <div class="row">
       ${n>0?`<button class="btn ghost" id="prev">← Vorige</button>`:""}
       <button class="btn" id="next" ${fin?"":"disabled style='opacity:.4'"}>${n+1<FOTOS.length?"Volgende foto →":"Naar de uitslag"}</button>
     </div>
   </section>`;
-  app.querySelectorAll(".opt:not(:disabled)").forEach(b=>b.addEventListener("click",()=>{
-    const k=b.dataset.k; st.ans[n]=st.ans[n]||{}; st.ans[n][k]=b.dataset.v; save(); render(); }));
+  const form=app.querySelector("#f");
+  form?.addEventListener("submit",e=>{ e.preventDefault(); const v=app.querySelector("#txt").value.trim(); if(!v) return;
+    st.ans[n]={txt:v, ok:isRight(n,v)}; save(); render(); });
+  if(form) setTimeout(()=>app.querySelector("#txt")?.focus({preventScroll:true}),50);
+  app.querySelector("#override")?.addEventListener("click",()=>{ st.ans[n].ok=true; save(); render(); });
   app.querySelector("#prev")?.addEventListener("click",()=>go(n-1));
   app.querySelector("#next")?.addEventListener("click",()=>{ if(done(n)) go(n+1); });
 }
@@ -136,7 +141,7 @@ function cover(){
     <svg class="rings" viewBox="0 0 72 44" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="26" cy="22" r="16"/><circle cx="46" cy="22" r="16"/></svg>
     <div class="eyebrow">Cuimhne is Gaelic voor herinnering</div>
     <h1>${QUIZ.titel}<span class="sub">${QUIZ.ondertitel}</span></h1>
-    <p class="lead">${FOTOS.length} foto's uit de voorbije jaren. Bij elke foto één vraag: waar was dit? Elk juist antwoord is een punt waard.</p>
+    <p class="lead">${FOTOS.length} foto's uit de voorbije jaren. Bij elke foto één vraag: waar was dit? Typ jullie antwoord. Het hoeft niet letterlijk, als het in de buurt komt telt het. Elk juist antwoord is een punt waard.</p>
     <div class="facts">
       <div class="fact"><small>Voor</small><strong>${QUIZ.voor}</strong></div>
       <div class="fact"><small>Van</small><strong>${QUIZ.van}</strong></div>
