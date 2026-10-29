@@ -82,7 +82,7 @@ button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 <main class="app" id="app"></main>
 <script src="vragen.js"></script>
 <script>
-const KEY="cuimhne-quiz-v1";
+const KEY="cuimhne-quiz-v2";
 let st=load()||{i:-1,ans:{}};
 function load(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
@@ -93,13 +93,11 @@ function rng(seed){ return ()=>{ seed=(seed*1664525+1013904223)%4294967296; retu
 function shuffle(a,r){ a=a.slice(); for(let k=a.length-1;k>0;k--){ const j=Math.floor(r()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
 const allPlaces=[...new Set([...FOTOS.map(f=>f.waar).filter(Boolean),...QUIZ.afleiders])];
 function placeOpts(n){ const f=FOTOS[n]; if(!f.waar) return []; const r=rng(n*97+13); const others=shuffle(allPlaces.filter(p=>p!==f.waar),r).slice(0,3); return shuffle([f.waar,...others],r); }
-function yearOpts(n){ const f=FOTOS[n]; if(!f.jaar) return []; const r=rng(n*31+7); const max=new Date().getFullYear();
-  const cand=[-3,-2,-1,1,2,3].map(d=>f.jaar+d).filter(y=>y<=max); return shuffle(cand,r).slice(0,3).concat(f.jaar).sort((a,b)=>a-b); }
 
-function points(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return (f.waar&&a.w===f.waar?1:0)+(f.jaar&&a.j===f.jaar?1:0); }
-function maxPoints(){ return FOTOS.reduce((s,f)=>s+(f.waar?1:0)+(f.jaar?1:0),0); }
+function points(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return f.waar&&a.w===f.waar?1:0; }
+function maxPoints(){ return FOTOS.reduce((s,f)=>s+(f.waar?1:0),0); }
 function score(){ return FOTOS.reduce((s,_,n)=>s+points(n),0); }
-function done(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return (!f.waar||a.w!=null)&&(!f.jaar||a.j!=null); }
+function done(n){ const a=st.ans[n]||{}, f=FOTOS[n]; return !f.waar||a.w!=null; }
 
 function bar(){
   const n=st.i, pct=n<0?0:Math.round((Math.min(n,FOTOS.length))/FOTOS.length*100);
@@ -115,20 +113,18 @@ function render(){
     if(answered){ if(val===correct) c+=" right"; else if(val===picked) c+=" wrong"; else c+=" dim"; }
     return `<button class="${c}" data-k="${kind}" data-v="${val}" ${answered?"disabled":""}>${val}</button>`; };
   const q1 = f.waar ? `<div class="opts">${placeOpts(n).map(p=>btn(p,a.w,f.waar,"w")).join("")}</div>` : `<div class="todo">Plaats nog in te vullen in vragen.js</div>`;
-  const q2 = f.jaar ? `<div class="opts years">${yearOpts(n).map(y=>btn(y,a.j,f.jaar,"j")).join("")}</div>` : `<div class="todo">Jaar nog in te vullen in vragen.js</div>`;
   const fin=done(n);
   app.innerHTML=bar()+`<section class="card">
     <figure class="photo"><img src="img/${f.img}" alt="Foto ${n+1}"></figure>
     <div class="q"><h3>Waar is deze foto genomen?<span class="pt">1 punt</span></h3>${q1}</div>
-    <div class="q"><h3>In welk jaar?<span class="pt">1 punt</span></h3>${q2}</div>
-    ${fin?`<div class="note"><strong>${points(n)===2?"Allebei juist!":points(n)===1?"Half juist":"Helaas"}</strong>${f.weetje||""}</div>`:""}
+    ${fin?`<div class="note"><strong>${points(n)?"Juist!":"Helaas, het was "+f.waar}</strong>${f.weetje||""}</div>`:""}
     <div class="row">
       ${n>0?`<button class="btn ghost" id="prev">← Vorige</button>`:""}
       <button class="btn" id="next" ${fin?"":"disabled style='opacity:.4'"}>${n+1<FOTOS.length?"Volgende foto →":"Naar de uitslag"}</button>
     </div>
   </section>`;
   app.querySelectorAll(".opt:not(:disabled)").forEach(b=>b.addEventListener("click",()=>{
-    const k=b.dataset.k; st.ans[n]=st.ans[n]||{}; st.ans[n][k]= k==="j"? +b.dataset.v : b.dataset.v; save(); render(); }));
+    const k=b.dataset.k; st.ans[n]=st.ans[n]||{}; st.ans[n][k]=b.dataset.v; save(); render(); }));
   app.querySelector("#prev")?.addEventListener("click",()=>go(n-1));
   app.querySelector("#next")?.addEventListener("click",()=>{ if(done(n)) go(n+1); });
 }
@@ -139,7 +135,7 @@ function cover(){
     <svg class="rings" viewBox="0 0 72 44" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="26" cy="22" r="16"/><circle cx="46" cy="22" r="16"/></svg>
     <div class="eyebrow">Cuimhne is Gaelic voor herinnering</div>
     <h1>${QUIZ.titel}<span class="sub">${QUIZ.ondertitel}</span></h1>
-    <p class="lead">${FOTOS.length} foto's uit de voorbije jaren. Bij elke foto twee vragen: waar was dit, en in welk jaar? Elk juist antwoord is een punt waard.</p>
+    <p class="lead">${FOTOS.length} foto's uit de voorbije jaren. Bij elke foto één vraag: waar was dit? Elk juist antwoord is een punt waard.</p>
     <div class="facts">
       <div class="fact"><small>Voor</small><strong>${QUIZ.voor}</strong></div>
       <div class="fact"><small>Van</small><strong>${QUIZ.van}</strong></div>
@@ -158,7 +154,7 @@ function end(){
     <div class="eyebrow" style="text-align:center">De uitslag</div>
     <div class="big">${s}<small> / ${m}</small></div>
     <h2 style="text-align:center">${msg}</h2>
-    <div class="recap">${FOTOS.map((f,n)=>{ const p=points(n), mx=(f.waar?1:0)+(f.jaar?1:0); return `<div class="${p===mx&&mx?'full':''}"><img src="img/${f.img}" alt=""><span>${p}/${mx}</span></div>`; }).join("")}</div>
+    <div class="recap">${FOTOS.map((f,n)=>{ const p=points(n); return `<div class="${p?'full':''}"><img src="img/${f.img}" alt="">${f.waar?`<span>${p?'✓':'✗'}</span>`:''}</div>`; }).join("")}</div>
     <p class="muted" style="text-align:center;color:var(--muted)">Met liefde verzameld door ${QUIZ.van}.</p>
     <div class="row"><button class="btn ghost" id="back">← Terug</button><button class="btn" id="again">Opnieuw spelen</button></div>
   </section>`;
